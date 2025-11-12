@@ -58,9 +58,13 @@ def _wallet_jwt_for_booking(booking:Booking, access_code:str, object_suffix:str)
     object_id=f"{issuer_id}.{object_suffix}"
 
     service_account_email=os.getenv("GOOGLE_SERVICE_ACCOUNT_EMAIL")
-    key_path=os.getenv("GOOGLE_SERVICE_ACCOUNT_KEY_JSON_PATH")
-    with open(key_path,"r") as f:
-        sa=json.load(f)
+    sa_env=os.getenv("GOOGLE_SERVICE_ACCOUNT_KEY_JSON")
+    if sa_env:
+        sa=json.loads(sa_env)
+    else:
+        key_path=os.getenv("GOOGLE_SERVICE_ACCOUNT_KEY_JSON_PATH")
+        with open(key_path,"r") as f:
+            sa=json.load(f)
 
     iat=int(time.time())
     exp=iat+3600

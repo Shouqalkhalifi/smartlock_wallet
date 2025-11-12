@@ -1,5 +1,4 @@
 import os, datetime
-import dj_database_url
 from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv()
@@ -64,11 +63,23 @@ DATABASES = {
 }
 
 # إذا كان DATABASE_URL مضبوطاً (مثل Render Postgres) نستخدمه بدلاً من SQLite
-if os.getenv("DATABASE_URL"):
+# فقط في الإنتاج (DEBUG=False) أو إذا تم فرض ذلك بـ USE_DATABASE_URL=true
+if os.getenv("DATABASE_URL") and (not DEBUG or os.getenv("USE_DATABASE_URL", "false").lower() == "true"):
+    # استيراد كسول لتفادي الحاجة إلى الحزمة محلياً إن لم نستخدم DATABASE_URL
+    import dj_database_url  # type: ignore
+    from urllib.parse import urlparse
+    _db_url = os.getenv("DATABASE_URL")
+    _host = (urlparse(_db_url).hostname or "").lower()
+    # بشكل افتراضي: عطّل SSL لبيئات localhost فقط، وأبقِه مفعلاً لغير ذلك
+    _ssl_env = os.getenv("DB_SSL_REQUIRE")
+    if _ssl_env is None:
+        _ssl_require = False if _host in ("localhost", "127.0.0.1") else True
+    else:
+        _ssl_require = _ssl_env.lower() == "true"
     DATABASES["default"] = dj_database_url.parse(
-        os.getenv("DATABASE_URL"),
+        _db_url,
         conn_max_age=600,
-        ssl_require=os.getenv("DB_SSL_REQUIRE", "true").lower() == "true",
+        ssl_require=_ssl_require,
     )
 
 STATIC_URL = "static/"
@@ -102,6 +113,13 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.AnonRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES":{"user":"120/min","anon":"30/min"},
+}
+
+# إعدادات Simple JWT (مدة صلاحية التوكن من البيئة بالدقائق)
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": datetime.timedelta(
+        minutes=int(os.getenv("ACCESS_TOKEN_LIFETIME_MIN", "60"))
+    )
 }
 
 SPECTACULAR_SETTINGS = {
