@@ -1,4 +1,5 @@
 import os, datetime
+import dj_database_url
 from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv()
@@ -6,8 +7,9 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-secret-key")
-DEBUG = True   # ✅ خليه True الآن للتجربة
-ALLOWED_HOSTS = ["*"]  # ✅ سماح كامل الآن — لاحقًا نضبطه حسب الدومين
+DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
+# يسمح بكل شيء افتراضياً، ويمكن ضبطه عبر ALLOWED_HOSTS=domain1,domain2
+ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "*").split(",") if h.strip()]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -61,12 +63,20 @@ DATABASES = {
     }
 }
 
+# إذا كان DATABASE_URL مضبوطاً (مثل Render Postgres) نستخدمه بدلاً من SQLite
+if os.getenv("DATABASE_URL"):
+    DATABASES["default"] = dj_database_url.parse(
+        os.getenv("DATABASE_URL"),
+        conn_max_age=600,
+        ssl_require=os.getenv("DB_SSL_REQUIRE", "true").lower() == "true",
+    )
+
 STATIC_URL = "static/"
 
-# ✅ تعطيل سياسات HTTPS بالكامل الآن
-SECURE_SSL_REDIRECT = False
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
+# إعدادات HTTPS قابلة للضبط من البيئة
+SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "False").lower() == "true"
+SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "False").lower() == "true"
+CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "False").lower() == "true"
 SECURE_HSTS_SECONDS = 0
 SECURE_HSTS_INCLUDE_SUBDOMAINS = False
 SECURE_HSTS_PRELOAD = False
@@ -76,8 +86,13 @@ SECURE_REFERRER_POLICY = "same-origin"
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 
-# ✅ السماح مؤقتاً لكل Origins
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS: إن تم ضبط CORS_ALLOWED_ORIGINS فسنستخدمها، وإلا نسمح للجميع (للتجربة)
+_cors_list = [o.strip() for o in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if o.strip()]
+CORS_ALLOW_ALL_ORIGINS = False if _cors_list else True
+CORS_ALLOWED_ORIGINS = _cors_list
+
+# CSRF trusted origins: ضف الدومين مع البروتوكول
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()]
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES":["rest_framework_simplejwt.authentication.JWTAuthentication"],
