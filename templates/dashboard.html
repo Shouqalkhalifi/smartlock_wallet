@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>الحجوزات</h1>
+
+    {% if bookings %}
+        <ul>
+            {% for booking in bookings %}
+                <li>
+                    {{ booking.id }} - {{ booking.status }} - {{ booking.room_id }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>لا يوجد حجوزات.</p>
+    {% endif %}
+</body>
+</html>
