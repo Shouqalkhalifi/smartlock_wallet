@@ -1,7 +1,12 @@
+from django.urls import path
 from rest_framework.routers import DefaultRouter
-from .views import BookingViewSet
+from .views import BookingViewSet, dashboard
 
 router = DefaultRouter()
-router.register("", BookingViewSet, basename="booking")
+router.register("api", BookingViewSet, basename="booking")
 
-urlpatterns = router.urls
+urlpatterns = [
+    path("", dashboard, name="dashboard"),
+]
+
+urlpatterns += router.urls
