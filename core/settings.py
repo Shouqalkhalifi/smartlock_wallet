@@ -20,10 +20,15 @@ DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
 
+# رابط لوحة الإدارة (مخفي عن العملاء)
+# تقدرين تغيّرينه من متغير بيئة DJANGO_ADMIN_URL لو حبيتي
+ADMIN_URL = os.getenv("DJANGO_ADMIN_URL", "secret-admin-1293/")
+
 # -------------------------------------------------
 # APPS
 # -------------------------------------------------
 INSTALLED_APPS = [
+    # Django
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -40,6 +45,7 @@ INSTALLED_APPS = [
     "bookings",
     "locks",
     "walletpass",
+    "dashboard",  # لوحة الموظفين
 ]
 
 # -------------------------------------------------
@@ -125,7 +131,9 @@ ACCESS_TOKEN_LIFETIME_MIN = int(os.getenv("ACCESS_TOKEN_LIFETIME_MIN", 60))
 GOOGLE_ISSUER_ID = os.getenv("GOOGLE_ISSUER_ID")
 GOOGLE_CLASS_SUFFIX = os.getenv("GOOGLE_CLASS_SUFFIX")
 GOOGLE_SERVICE_ACCOUNT_EMAIL = os.getenv("GOOGLE_SERVICE_ACCOUNT_EMAIL")
-GOOGLE_SERVICE_ACCOUNT_KEY_JSON_PATH = os.getenv("GOOGLE_SERVICE_ACCOUNT_KEY_JSON_PATH")
+GOOGLE_SERVICE_ACCOUNT_KEY_JSON_PATH = os.getenv(
+    "GOOGLE_SERVICE_ACCOUNT_KEY_JSON_PATH"
+)
 
 # -------------------------------------------------
 # SMART LOCK (IGLOOHOME)
