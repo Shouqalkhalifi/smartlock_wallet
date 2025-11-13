@@ -87,3 +87,6 @@ def booking_cancel(request, pk):
 
     messages.success(request, "تم إلغاء الحجز بنجاح ❌")
     return redirect("booking_detail", pk=pk)
+
+def wallet_home(request):
+    return render(request, "dashboard/wallet_list.html")

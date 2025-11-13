@@ -12,4 +12,6 @@ urlpatterns = [
 
     # الأقفال الذكية
     path("locks/", views.locks_list, name="locks_list"),
+    path("wallet/", views.wallet_home, name="wallet_home"),
+
 ]
