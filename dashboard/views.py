@@ -13,6 +13,14 @@ def employee_home(request):
 
 
 # -------------------------------------------------
+# صفحة عرض الأقفال الذكية
+# -------------------------------------------------
+def locks_list(request):
+    locks = SmartLock.objects.all().order_by("-created_at")
+    return render(request, "dashboard/locks_list.html", {"locks": locks})
+
+
+# -------------------------------------------------
 # صفحة عرض جميع الحجوزات
 # -------------------------------------------------
 def booking_list(request):
@@ -29,7 +37,7 @@ def booking_detail(request, pk):
 
 
 # -------------------------------------------------
-# تأكيد الحجز
+# تأكيد الحجز + توليد PIN + NFC Wallet
 # -------------------------------------------------
 def booking_confirm(request, pk):
     booking = get_object_or_404(Booking, pk=pk)
@@ -64,7 +72,7 @@ def booking_confirm(request, pk):
 
 
 # -------------------------------------------------
-# إلغاء الحجز
+# إلغاء الحجز + حذف الكود من القفل
 # -------------------------------------------------
 def booking_cancel(request, pk):
     booking = get_object_or_404(Booking, pk=pk)
