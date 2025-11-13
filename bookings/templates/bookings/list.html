@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>لوحة الحجز التجريبية</title>
+  <style>
+    body { font-family: sans-serif; background: #f3f4f6; margin: 20px; }
+    table { width: 100%; border-collapse: collapse; background: white; }
+    th, td { padding: 10px; border-bottom: 1px solid #ccc; text-align: center; }
+    form { margin-bottom: 30px; background: white; padding: 20px; border-radius: 10px; }
+    .actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+    .btn { padding: 6px 10px; border: 1px solid #ddd; background: #111827; color: #fff; border-radius: 6px; cursor: pointer; }
+    .btn.cancel { background: #9b1c1c; }
+    .badge { display:inline-block; padding:2px 8px; border-radius: 9999px; font-size: 12px; }
+    .badge.pending { background:#fef3c7; color:#92400e; }
+    .badge.confirmed { background:#d1fae5; color:#065f46; }
+    .badge.cancelled { background:#fee2e2; color:#991b1b; }
+  </style>
+</head>
+<body>
+  <h1>📋 لوحة الحجوزات</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    <label>اسم النزيل:</label>
+    <input type="text" name="guest_name" required>
+    <label>رقم الغرفة:</label>
+    <input type="text" name="room_id" required>
+    <label>تاريخ الدخول:</label>
+    <input type="datetime-local" name="start_at" required>
+    <label>تاريخ الخروج:</label>
+    <input type="datetime-local" name="end_at" required>
+    <button type="submit">إضافة</button>
+  </form>
+
+  <table>
+    <tr>
+      <th>الاسم</th>
+      <th>الغرفة</th>
+      <th>من</th>
+      <th>إلى</th>
+      <th>الحالة</th>
+      <th>الوصول</th>
+      <th>إجراءات</th>
+    </tr>
+    {% for b in bookings %}
+    <tr>
+      <td>{{ b.guest_name }}</td>
+      <td>{{ b.room_id }}</td>
+      <td>{{ b.start_at|date:"Y-m-d H:i" }}</td>
+      <td>{{ b.end_at|date:"Y-m-d H:i" }}</td>
+      <td>
+        <span class="badge {{ b.status }}">{{ b.status }}</span>
+      </td>
+      <td>
+        {% if b.accesspass %}
+          {% if b.accesspass.code %}
+            <div>كود: <strong>{{ b.accesspass.code }}</strong></div>
+          {% endif %}
+          {% if b.accesspass.wallet_jwt %}
+            <a href="https://pay.google.com/gp/v/save/{{ b.accesspass.wallet_jwt }}" target="_blank">حفظ البطاقة (Google Wallet)</a>
+          {% endif %}
+        {% else %}
+          —
+        {% endif %}
+      </td>
+      <td>
+        <div class="actions">
+          {% if b.status == 'pending' %}
+            <form method="post" action="/bookings/{{ b.id }}/confirm/">
+              {% csrf_token %}
+              <button class="btn" type="submit">تأكيد وإصدار بطاقة</button>
+            </form>
+          {% endif %}
+          {% if b.status != 'cancelled' %}
+            <form method="post" action="/bookings/{{ b.id }}/cancel/">
+              {% csrf_token %}
+              <button class="btn cancel" type="submit">إلغاء/إبطال الوصول</button>
+            </form>
+          {% endif %}
+        </div>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7">لا توجد حجوزات بعد</td></tr>
+    {% endfor %}
+  </table>
+</body>
+</html>

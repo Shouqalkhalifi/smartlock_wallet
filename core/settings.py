@@ -1,15 +1,28 @@
-import os, datetime
+import os
 from pathlib import Path
+import dj_database_url
 from dotenv import load_dotenv
+
+# -------------------------------------------------
+# Load Environment Variables
+# -------------------------------------------------
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-secret-key")
-DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
-# يسمح بكل شيء افتراضياً، ويمكن ضبطه عبر ALLOWED_HOSTS=domain1,domain2
-ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "*").split(",") if h.strip()]
+# -------------------------------------------------
+# SECURITY
+# -------------------------------------------------
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "unsafe-default-key")
 
+DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
+
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+
+# -------------------------------------------------
+# APPS
+# -------------------------------------------------
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -18,119 +31,104 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
+    # Third-party
     "rest_framework",
     "drf_spectacular",
     "corsheaders",
 
+    # Local apps
     "bookings",
     "locks",
     "walletpass",
 ]
 
+# -------------------------------------------------
+# MIDDLEWARE
+# -------------------------------------------------
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-
     "corsheaders.middleware.CorsMiddleware",
-
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
 ]
 
-
 ROOT_URLCONF = "core.urls"
 
-TEMPLATES = [{
-    "BACKEND":"django.template.backends.django.DjangoTemplates",
-    "DIRS":[BASE_DIR/"templates"],
-    "APP_DIRS":True,
-    "OPTIONS":{"context_processors":[
-        "django.template.context_processors.debug",
-        "django.template.context_processors.request",
-        "django.contrib.auth.context_processors.auth",
-        "django.contrib.messages.context_processors.messages",
-    ]}
-}]
+# -------------------------------------------------
+# TEMPLATES
+# -------------------------------------------------
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    }
+]
+
 WSGI_APPLICATION = "core.wsgi.application"
 
+# -------------------------------------------------
+# DATABASE - Render PostgreSQL
+# -------------------------------------------------
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
-# إذا كان DATABASE_URL مضبوطاً (مثل Render Postgres) نستخدمه بدلاً من SQLite
-# فقط في الإنتاج (DEBUG=False) أو إذا تم فرض ذلك بـ USE_DATABASE_URL=true
-if os.getenv("DATABASE_URL") and (not DEBUG or os.getenv("USE_DATABASE_URL", "false").lower() == "true"):
-    # استيراد كسول لتفادي الحاجة إلى الحزمة محلياً إن لم نستخدم DATABASE_URL
-    import dj_database_url  # type: ignore
-    from urllib.parse import urlparse
-    _db_url = os.getenv("DATABASE_URL")
-    _host = (urlparse(_db_url).hostname or "").lower()
-    # بشكل افتراضي: عطّل SSL لبيئات localhost فقط، وأبقِه مفعلاً لغير ذلك
-    _ssl_env = os.getenv("DB_SSL_REQUIRE")
-    if _ssl_env is None:
-        _ssl_require = False if _host in ("localhost", "127.0.0.1") else True
-    else:
-        _ssl_require = _ssl_env.lower() == "true"
-    DATABASES["default"] = dj_database_url.parse(
-        _db_url,
+    "default": dj_database_url.parse(
+        os.getenv("DATABASE_URL"),
         conn_max_age=600,
-        ssl_require=_ssl_require,
+        ssl_require=True,
     )
-
-STATIC_URL = "static/"
-
-# إعدادات HTTPS قابلة للضبط من البيئة
-SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "False").lower() == "true"
-SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "False").lower() == "true"
-CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "False").lower() == "true"
-SECURE_HSTS_SECONDS = 0
-SECURE_HSTS_INCLUDE_SUBDOMAINS = False
-SECURE_HSTS_PRELOAD = False
-
-# ✅ تبقى هذه للحماية العامة
-SECURE_REFERRER_POLICY = "same-origin"
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_BROWSER_XSS_FILTER = True
-
-# CORS: إن تم ضبط CORS_ALLOWED_ORIGINS فسنستخدمها، وإلا نسمح للجميع (للتجربة)
-_cors_list = [o.strip() for o in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if o.strip()]
-CORS_ALLOW_ALL_ORIGINS = False if _cors_list else True
-CORS_ALLOWED_ORIGINS = _cors_list
-
-# CSRF trusted origins: ضف الدومين مع البروتوكول
-CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()]
-
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES":["rest_framework_simplejwt.authentication.JWTAuthentication"],
-    "DEFAULT_SCHEMA_CLASS":"drf_spectacular.openapi.AutoSchema",
-    "DEFAULT_THROTTLE_CLASSES":[
-        "rest_framework.throttling.UserRateThrottle",
-        "rest_framework.throttling.AnonRateThrottle",
-    ],
-    "DEFAULT_THROTTLE_RATES":{"user":"120/min","anon":"30/min"},
 }
 
-# إعدادات Simple JWT (مدة صلاحية التوكن من البيئة بالدقائق)
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": datetime.timedelta(
-        minutes=int(os.getenv("ACCESS_TOKEN_LIFETIME_MIN", "60"))
-    )
+# -------------------------------------------------
+# STATIC FILES
+# -------------------------------------------------
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# -------------------------------------------------
+# CORS
+# -------------------------------------------------
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = os.getenv("WALLET_SAVE_ORIGINS", "").split(",")
+
+# -------------------------------------------------
+# REST FRAMEWORK + JWT
+# -------------------------------------------------
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication"
+    ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE":"SmartLock Cloud API",
-    "DESCRIPTION":"Booking ↔ Smart Lock ↔ Google Wallet",
-    "VERSION":"1.0.0",
-    "SERVE_INCLUDE_SCHEMA": False,
+    "TITLE": "SmartLock Cloud API",
+    "DESCRIPTION": "Bookings API + Igloohome + Google Wallet Integration",
+    "VERSION": "1.0.0",
 }
 
-# ✅ Celery
-REDIS_URL = os.getenv("REDIS_URL")
-CELERY_BROKER_URL = REDIS_URL
-CELERY_RESULT_BACKEND = REDIS_URL
-CELERY_TIMEZONE = "UTC"
+ACCESS_TOKEN_LIFETIME_MIN = int(os.getenv("ACCESS_TOKEN_LIFETIME_MIN", 60))
+
+# -------------------------------------------------
+# GOOGLE WALLET
+# -------------------------------------------------
+GOOGLE_ISSUER_ID = os.getenv("GOOGLE_ISSUER_ID")
+GOOGLE_CLASS_SUFFIX = os.getenv("GOOGLE_CLASS_SUFFIX")
+GOOGLE_SERVICE_ACCOUNT_EMAIL = os.getenv("GOOGLE_SERVICE_ACCOUNT_EMAIL")
+GOOGLE_SERVICE_ACCOUNT_KEY_JSON_PATH = os.getenv("GOOGLE_SERVICE_ACCOUNT_KEY_JSON_PATH")
+
+# -------------------------------------------------
+# SMART LOCK (IGLOOHOME)
+# -------------------------------------------------
+IGLOO_API_BASE_URL = os.getenv("SMARTLOCK_API_BASE_URL")
+IGLOO_API_KEY = os.getenv("SMARTLOCK_API_KEY")

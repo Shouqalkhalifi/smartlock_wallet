@@ -1,42 +1,42 @@
 from django.db import models
-from bookings.models import Booking
+
 
 class SmartLock(models.Model):
-    VENDORS = [
-        ("TTLOCK", "TTLock"),
-        ("AQARA", "Aqara"),
-        ("IGLOO", "Igloohome"),
-    ]
-
+    """
+    قفل ذكي من Igloohome
+    lock_id = القيمة القادمة من Igloohome Cloud API
+    room_id = لربطه مع غرفة hotel
+    """
+    provider = models.CharField(max_length=50, default="igloohome")
+    room_id = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=100)
-    vendor = models.CharField(max_length=20, choices=VENDORS, default="TTLOCK")
-    room_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    lock_id = models.CharField(max_length=200, unique=True)  # مهم جدًا
 
-    external_id = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True,
-        help_text="Lock ID from vendor API"
-    )
-
-    location = models.CharField(max_length=255, default="Unknown Location")
-
-    def __str__(self):
-        return f"{self.name} ({self.vendor})"
-
-
-class AccessPass(models.Model):
-    booking = models.OneToOneField(Booking, on_delete=models.CASCADE)
-    lock = models.ForeignKey(SmartLock, on_delete=models.CASCADE)
-
-    code = models.CharField(max_length=255, blank=True, null=True)
-    wallet_jwt = models.TextField(blank=True, null=True)
-    wallet_object_id = models.CharField(max_length=255, blank=True, null=True)
-
-    valid_from = models.DateTimeField()
-    valid_to = models.DateTimeField()
-    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Access for Booking {self.booking.id}"
+        return f"{self.room_id} - {self.name}"
+
+
+class AccessPass(models.Model):
+    """
+    كود الوصول المؤقت للقفل + بيانات بطاقة Google Wallet
+    """
+    booking = models.OneToOneField("bookings.Booking", on_delete=models.CASCADE)
+    lock = models.ForeignKey(SmartLock, on_delete=models.CASCADE)
+
+    smartlock_key_id = models.CharField(max_length=200, blank=True, null=True)
+    smartlock_pin_code = models.CharField(max_length=50, blank=True, null=True)
+
+    wallet_object_id = models.CharField(max_length=200, blank=True, null=True)
+    wallet_jwt = models.TextField(blank=True, null=True)
+    wallet_save_url = models.URLField(blank=True, null=True)
+
+    valid_from = models.DateTimeField()
+    valid_to = models.DateTimeField()
+    active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Access Pass for Booking {self.booking.id}"
