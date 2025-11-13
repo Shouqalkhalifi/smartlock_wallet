@@ -20,9 +20,26 @@ DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
 
-# رابط لوحة الإدارة (مخفي عن العملاء)
-# تقدرين تغيّرينه من متغير بيئة DJANGO_ADMIN_URL لو حبيتي
+# لوحة الإدارة السرية
 ADMIN_URL = os.getenv("DJANGO_ADMIN_URL", "secret-admin-1293/")
+
+# -------------------------------------------------
+# LANGUAGE & TIMEZONE (ARABIC SUPPORT)
+# -------------------------------------------------
+LANGUAGE_CODE = "ar"
+TIME_ZONE = "Asia/Riyadh"
+
+USE_I18N = True
+USE_TZ = True
+
+LANGUAGES = [
+    ("ar", "Arabic"),
+    ("en", "English"),
+]
+
+LOCALE_PATHS = [
+    BASE_DIR / "locale",
+]
 
 # -------------------------------------------------
 # APPS
@@ -45,7 +62,7 @@ INSTALLED_APPS = [
     "bookings",
     "locks",
     "walletpass",
-    "dashboard",  # لوحة الموظفين
+    "dashboard",
 ]
 
 # -------------------------------------------------
@@ -54,6 +71,10 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+
+    # *** ضروري للتعريب ***
+    "django.middleware.locale.LocaleMiddleware",
+
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -85,7 +106,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "core.wsgi.application"
 
 # -------------------------------------------------
-# DATABASE - Render PostgreSQL
+# DATABASE (Render PostgreSQL)
 # -------------------------------------------------
 DATABASES = {
     "default": dj_database_url.parse(
