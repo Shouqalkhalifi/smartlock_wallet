@@ -3,29 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة الإدارة</title>
+    <title>نظام إدارة الحجوزات</title>
 
-    <!-- Tailwind CDN -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
         body { background-color: #f5f7fa; }
     </style>
 </head>
+
 <body class="min-h-screen">
 
-    <!-- Header -->
+    <!-- Navigation Bar -->
     <nav class="bg-blue-800 text-white p-4 shadow">
-        <div class="container mx-auto flex justify-between">
+        <div class="container mx-auto flex justify-between items-center">
+
             <h1 class="font-bold text-xl">نظام إدارة الحجوزات</h1>
-<a href="/dashboard/bookings/" class="hover:text-yellow-300">الحجوزات</a>
+
+            <div class="flex gap-6">
+                <a href="{% url 'dashboard_home' %}" class="hover:text-yellow-300">الرئيسية</a>
+                <a href="{% url 'booking_list' %}" class="hover:text-yellow-300">الحجوزات</a>
+            </div>
+
         </div>
     </nav>
 
     <!-- Page Content -->
-    <div class="container mx-auto p-6">
-        {% block content %}
-        {% endblock %}
+    <div class="container mx-auto p-8">
+        {% block content %}{% endblock %}
     </div>
 
 </body>

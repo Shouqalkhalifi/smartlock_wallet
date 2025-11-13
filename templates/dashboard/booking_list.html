@@ -1,11 +1,13 @@
 {% extends "dashboard/base.html" %}
 
 {% block content %}
-<h2 class="text-3xl font-bold mb-6">الحجوزات</h2>
+
+<h2 class="text-4xl font-bold text-center mb-10 text-gray-800">📘 قائمة الحجوزات</h2>
 
 {% if bookings %}
-<table class="min-w-full bg-white shadow rounded-lg overflow-hidden">
-    <thead class="bg-gray-200">
+<div class="overflow-x-auto shadow-lg rounded-lg">
+<table class="min-w-full bg-white">
+    <thead class="bg-blue-100 border-b">
         <tr>
             <th class="p-3 text-right">#</th>
             <th class="p-3 text-right">الضيف</th>
@@ -19,24 +21,26 @@
 
     <tbody>
     {% for b in bookings %}
-        <tr class="border-b hover:bg-gray-100">
+        <tr class="border-b hover:bg-gray-100 transition">
             <td class="p-3">{{ b.id }}</td>
-            <td class="p-3">{{ b.guest_name }}</td>
+            <td class="p-3 font-semibold">{{ b.guest_name }}</td>
             <td class="p-3">{{ b.room_id }}</td>
             <td class="p-3">{{ b.start_date }}</td>
             <td class="p-3">{{ b.end_date }}</td>
-            <td class="p-3">
+
+            <td class="p-3 font-bold">
                 {% if b.status == "confirmed" %}
-                    <span class="text-green-600 font-bold">✔ مؤكد</span>
+                    <span class="text-green-600">✔ مؤكد</span>
                 {% elif b.status == "cancelled" %}
-                    <span class="text-red-600 font-bold">✘ ملغى</span>
+                    <span class="text-red-600">✘ ملغى</span>
                 {% else %}
-                    <span class="text-yellow-600 font-bold">قيد الانتظار</span>
+                    <span class="text-yellow-600">قيد الانتظار</span>
                 {% endif %}
             </td>
+
             <td class="p-3">
-                <a href="/dashboard/bookings/{{ b.id }}/"
-                   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded">
+                <a href="{% url 'booking_detail' b.id %}"
+                   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow">
                    التفاصيل
                 </a>
             </td>
@@ -44,8 +48,10 @@
     {% endfor %}
     </tbody>
 </table>
+</div>
 
 {% else %}
-<p class="text-gray-600">لا توجد حجوزات حالياً.</p>
+<p class="text-gray-600 text-center text-xl mt-12">لا توجد حجوزات حالياً.</p>
 {% endif %}
+
 {% endblock %}
