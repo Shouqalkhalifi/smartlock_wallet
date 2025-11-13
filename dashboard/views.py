@@ -6,10 +6,10 @@ from locks.services import provision_access_for_booking, revoke_access_for_booki
 
 
 # -------------------------------------------------
-# الصفحة الرئيسية → إعادة توجيه إلى قائمة الحجوزات
+# الصفحة الرئيسية للموظف (لوحة التحكم)
 # -------------------------------------------------
-def dashboard_home(request):
-    return redirect("booking_list")
+def employee_home(request):
+    return render(request, "dashboard/home.html")
 
 
 # -------------------------------------------------
@@ -30,9 +30,6 @@ def booking_detail(request, pk):
 
 # -------------------------------------------------
 # تأكيد الحجز
-# - ربط مع SmartLock
-# - توليد PIN
-# - إنشاء Google Wallet Pass
 # -------------------------------------------------
 def booking_confirm(request, pk):
     booking = get_object_or_404(Booking, pk=pk)
@@ -68,8 +65,6 @@ def booking_confirm(request, pk):
 
 # -------------------------------------------------
 # إلغاء الحجز
-# - حذف PIN من القفل
-# - تعطيل بطاقة العميل
 # -------------------------------------------------
 def booking_cancel(request, pk):
     booking = get_object_or_404(Booking, pk=pk)
