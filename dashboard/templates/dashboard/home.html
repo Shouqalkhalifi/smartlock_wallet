@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة الموظف</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #eef1f5;
+        }
+        .header {
+            background: #0d6efd;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .card-box {
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            background: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: 0.3s;
+        }
+        .card-box:hover {
+            transform: translateY(-6px);
+        }
+        .card-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">لوحة إدارة الحجوزات</div>
+
+<div class="container mt-5">
+
+    <div class="row g-4">
+
+        <div class="col-md-4">
+            <a href="/bookings" class="text-decoration-none text-dark">
+                <div class="card-box">
+                    <div class="card-title">📘 إدارة الحجوزات</div>
+                    <p>عرض – تعديل – تأكيد – إلغاء الحجوزات</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="/locks" class="text-decoration-none text-dark">
+                <div class="card-box">
+                    <div class="card-title">🔐 الأقفال الذكية</div>
+                    <p>إدارة الأقفال – الكود – الصلاحيات</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="/wallet" class="text-decoration-none text-dark">
+                <div class="card-box">
+                    <div class="card-title">💳 بطاقات الدخول</div>
+                    <p>إنشاء – تعطيل – إدارة بطاقات النزلاء</p>
+                </div>
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
