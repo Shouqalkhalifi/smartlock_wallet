@@ -2,13 +2,12 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # الصفحة الرئيسية للوحة الموظف
     path("", views.dashboard_home, name="dashboard_home"),
 
     # قائمة الحجوزات
     path("bookings/", views.booking_list, name="booking_list"),
 
-    # تفاصيل الحجز
+    # تفاصيل حجز معين
     path("bookings/<int:pk>/", views.booking_detail, name="booking_detail"),
 
     # تأكيد الحجز
