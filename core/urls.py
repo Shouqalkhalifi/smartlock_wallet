@@ -20,6 +20,8 @@ urlpatterns = [
     # لوحة الموظفين (Dashboard)
     # -------------------------------------------------
     path("dashboard/", include("dashboard.urls")),
+    path("dashboard/create/", booking_create, name="booking_create"),
+    path("dashboard/<int:pk>/edit/", booking_edit, name="booking_edit"),
 
     # -------------------------------------------------
     # API Documentation (Swagger UI)

@@ -1,0 +1,19 @@
+<h2>تعديل الحجز</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <label>اسم الضيف:</label>
+    <input type="text" name="guest_name" value="{{ booking.guest_name }}" required>
+
+    <label>رقم الغرفة:</label>
+    <input type="number" name="room_id" value="{{ booking.room_id }}" required>
+
+    <label>من:</label>
+    <input type="datetime-local" name="start_date" value="{{ booking.start_date|date:'Y-m-d\\TH:i' }}" required>
+
+    <label>إلى:</label>
+    <input type="datetime-local" name="end_date" value="{{ booking.end_date|date:'Y-m-d\\TH:i' }}" required>
+
+    <button type="submit">تحديث</button>
+</form>
