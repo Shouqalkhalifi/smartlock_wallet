@@ -11,13 +11,36 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # -------------------------------------------------
 # SECURITY
 # -------------------------------------------------
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "unsafe-default-key")
-DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = [h for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h]
-CSRF_TRUSTED_ORIGINS = [
-    o for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "unsafe-default-key")
+
+# DEBUG ديناميكي
+DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
+
+# Render / Production hosts
+DEFAULT_ALLOWED = [
+    "localhost",
+    "127.0.0.1",
+    ".onrender.com",
+    os.getenv("RENDER_EXTERNAL_HOSTNAME", "")
 ]
+
+# دمج البيئة مع الديفولت
+ENV_ALLOWED = [h for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h]
+ALLOWED_HOSTS = list(set(DEFAULT_ALLOWED + ENV_ALLOWED))
+
+# CSRF
+DEFAULT_CSRF = [
+    "https://*.onrender.com",
+]
+ENV_CSRF = [o for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o]
+CSRF_TRUSTED_ORIGINS = list(set(DEFAULT_CSRF + ENV_CSRF))
+
+# HTTPS Security (مهم لـ Render)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
 
 ADMIN_URL = os.getenv("DJANGO_ADMIN_URL", "secret-admin-1293/")
 
@@ -102,6 +125,7 @@ WSGI_APPLICATION = "core.wsgi.application"
 # DATABASE
 # -------------------------------------------------
 DATABASE_URL = os.getenv("DATABASE_URL")
+
 if DATABASE_URL:
     DATABASES = {
         "default": dj_database_url.parse(
@@ -111,7 +135,6 @@ if DATABASE_URL:
         )
     }
 else:
-    # fallback بسيط للتطوير المحلي
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
