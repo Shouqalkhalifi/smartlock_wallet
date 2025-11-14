@@ -25,7 +25,6 @@ DEFAULT_ALLOWED = [
     os.getenv("RENDER_EXTERNAL_HOSTNAME", "")
 ]
 
-# دمج البيئة مع الديفولت
 ENV_ALLOWED = [h for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h]
 ALLOWED_HOSTS = list(set(DEFAULT_ALLOWED + ENV_ALLOWED))
 
@@ -36,13 +35,13 @@ DEFAULT_CSRF = [
 ENV_CSRF = [o for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o]
 CSRF_TRUSTED_ORIGINS = list(set(DEFAULT_CSRF + ENV_CSRF))
 
-# HTTPS Security (مهم لـ Render)
+# HTTPS Security
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
-
-ADMIN_URL = os.getenv("DJANGO_ADMIN_URL", "secret-admin-1293/")
+# 🔥 هنا التعديل: رابط لوحة التحكم
+ADMIN_URL = "admin/"
 
 # -------------------------------------------------
 # LANGUAGE & TIMEZONE
@@ -60,11 +59,11 @@ LANGUAGES = [
 
 LOCALE_PATHS = [BASE_DIR / "locale"]
 
+
 # -------------------------------------------------
 # APPS
 # -------------------------------------------------
 INSTALLED_APPS = [
-    # Django
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -72,12 +71,10 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # Third-party
     "rest_framework",
     "drf_spectacular",
     "corsheaders",
 
-    # Local
     "bookings",
     "locks",
     "walletpass",
@@ -149,8 +146,8 @@ STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
-# لجعل Render يقدم static files
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+
 # -------------------------------------------------
 # CORS
 # -------------------------------------------------
