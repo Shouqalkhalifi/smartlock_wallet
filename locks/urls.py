@@ -1,9 +1,6 @@
-from rest_framework.routers import DefaultRouter
+from django.urls import path
+from .views import add_lock
 
-from .views import SmartLockViewSet, AccessPassViewSet
-
-router = DefaultRouter()
-router.register("devices", SmartLockViewSet)
-router.register("passes", AccessPassViewSet, basename="passes")
-
-urlpatterns = router.urls
+urlpatterns = [
+    path("add/", add_lock, name="add_lock"),
+]

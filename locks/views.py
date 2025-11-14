@@ -1,14 +1,17 @@
-from rest_framework import viewsets
-
-from .models import SmartLock, AccessPass
-from .serializers import SmartLockSerializer, AccessPassSerializer
+from django.shortcuts import render, redirect
+from .models import Lock
 
 
-class SmartLockViewSet(viewsets.ModelViewSet):
-    queryset = SmartLock.objects.all()
-    serializer_class = SmartLockSerializer
+def add_lock(request):
+    if request.method == "POST":
+        lock_name = request.POST.get("name")
+        room_id = request.POST.get("room_id")
 
+        if lock_name and room_id:
+            Lock.objects.create(
+                name=lock_name,
+                room_id=room_id,
+            )
+            return redirect("/locks/list/")
 
-class AccessPassViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = AccessPass.objects.all().order_by("-created_at")
-    serializer_class = AccessPassSerializer
+    return render(request, "locks/add_lock.html")

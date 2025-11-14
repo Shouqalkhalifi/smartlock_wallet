@@ -1,49 +1,54 @@
-from django.db import models
-from django.contrib.auth import get_user_model
-from django.utils import timezone
+from rest_framework import serializers
+from .models import Booking
+import pytz
 
-User = get_user_model()
+class BookingCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Booking
+        fields = ["guest_name", "guest_email", "room_id", "start_at", "end_at"]
+
+    def validate(self, data):
+        riyadh = pytz.timezone("Asia/Riyadh")
+
+        start = data["start_at"]
+        end = data["end_at"]
+
+        if start.tzinfo is None:
+            start = riyadh.localize(start)
+        if end.tzinfo is None:
+            end = riyadh.localize(end)
+
+        if end <= start:
+            raise serializers.ValidationError("end_at must be after start_at")
+
+        data["start_at"] = start
+        data["end_at"] = end
+
+        return data
 
 
-class Booking(models.Model):
-    PENDING = "pending"
-    CONFIRMED = "confirmed"
-    CANCELLED = "cancelled"
-    EXPIRED = "expired"
-
-    STATUS_CHOICES = [
-        (PENDING, "Pending"),
-        (CONFIRMED, "Confirmed"),
-        (CANCELLED, "Cancelled"),
-        (EXPIRED, "Expired"),
-    ]
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    guest_name = models.CharField(max_length=100)
-    guest_email = models.EmailField(blank=True, null=True)
-
-    room_id = models.CharField(max_length=50)
-
-    start_at = models.DateTimeField()
-    end_at = models.DateTimeField()
-
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=PENDING)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    # API / Integration help fields
-    wallet_object_id = models.CharField(max_length=200, blank=True, null=True)
-    wallet_save_url = models.URLField(blank=True, null=True)
-
-    smartlock_code = models.CharField(
-        max_length=100, blank=True, null=True, help_text="PIN / key code from TTLock"
-    )
-    smartlock_key_id = models.CharField(
-        max_length=100, blank=True, null=True, help_text="Key ID from TTLock"
-    )
-
-    def is_active(self) -> bool:
-        now = timezone.now()
-        return self.status == self.CONFIRMED and self.start_at <= now <= self.end_at
-
-    def __str__(self) -> str:
-        return f"Booking {self.id} for {self.guest_name} @ room {self.room_id}"
+class BookingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Booking
+        fields = [
+            "id",
+            "guest_name",
+            "guest_email",
+            "room_id",
+            "start_at",
+            "end_at",
+            "status",
+            "wallet_save_url",
+            "wallet_object_id",
+            "smartlock_code",
+            "smartlock_key_id",
+            "created_at",
+        ]
+        read_only_fields = (
+            "status",
+            "wallet_save_url",
+            "wallet_object_id",
+            "smartlock_code",
+            "smartlock_key_id",
+            "created_at",
+        )
