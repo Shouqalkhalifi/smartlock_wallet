@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views import BookingViewSet, dashboard
 
 router = DefaultRouter()
-router.register("api", BookingViewSet, basename="booking")
+router.register("", BookingViewSet, basename="booking")
 
 urlpatterns = [
     path("", dashboard, name="dashboard"),

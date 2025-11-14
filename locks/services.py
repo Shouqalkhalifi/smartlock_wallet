@@ -2,26 +2,26 @@ from django.utils import timezone
 
 from bookings.models import Booking
 from bookings.google_wallet import create_wallet_pass_for_booking
-from .models import SmartLock, AccessPass
+from .models import Lock, AccessPass
 from .ttlock_client import create_pin, delete_pin
 
 
-def provision_access_for_booking(booking: Booking, lock: SmartLock) -> dict:
+def provision_access_for_booking(booking: Booking, lock: Lock) -> dict:
     """
     إنشاء PIN مؤقت للقفل + بطاقة Google Wallet وربطه بالحجز
     """
+
+    # التحقق من صحة المدة الزمنية
     if booking.start_at >= booking.end_at:
         raise ValueError("Invalid booking time range")
 
-    # تحويل إلى timestamps بالـ milliseconds (حسب TTLock)
+    # timestamps لـ TTLock بالـ milliseconds
     start_ts = int(booking.start_at.timestamp() * 1000)
     end_ts = int(booking.end_at.timestamp() * 1000)
 
-    # استدعاء TTLock لإنشاء PIN
+    # إنشاء PIN عبر TTLock API
     pin_response = create_pin(lock.lock_id, start_ts, end_ts)
 
-    # NOTE: يجب التأكد من شكل الـ response الحقيقي من TTLock
-    # غالباً: keyboardPwdId + keyboardPwd
     if pin_response.get("errcode") not in (0, None):
         raise RuntimeError(f"TTLock error: {pin_response}")
 
@@ -34,6 +34,7 @@ def provision_access_for_booking(booking: Booking, lock: SmartLock) -> dict:
     # إنشاء بطاقة Google Wallet
     object_id, save_url = create_wallet_pass_for_booking(booking)
 
+    # إنشاء AccessPass
     access_pass = AccessPass.objects.create(
         booking=booking,
         lock=lock,
@@ -46,11 +47,12 @@ def provision_access_for_booking(booking: Booking, lock: SmartLock) -> dict:
         active=True,
     )
 
-    # تحديث بعض الحقول في Booking لسهولة العرض
+    # تحديث بيانات في الحجز
     booking.smartlock_key_id = access_pass.smartlock_key_id
     booking.smartlock_code = access_pass.smartlock_pin_code
     booking.wallet_object_id = access_pass.wallet_object_id
     booking.wallet_save_url = access_pass.wallet_save_url
+
     booking.save(update_fields=[
         "smartlock_key_id",
         "smartlock_code",
@@ -66,24 +68,26 @@ def provision_access_for_booking(booking: Booking, lock: SmartLock) -> dict:
 
 def revoke_access_for_booking(booking: Booking) -> bool:
     """
-    إلغاء صلاحية الوصول المرتبطة بحجز معيّن (TTLock + AccessPass)
+    إلغاء صلاحية الوصول المرتبطة بحجز معيّن (على TTLock وداخل النظام)
     """
+
     try:
         access_pass = AccessPass.objects.get(booking=booking, active=True)
     except AccessPass.DoesNotExist:
         return True
 
-    # استدعاء TTLock لإلغاء الـ PIN
+    # حذف PIN من TTLock
     try:
         delete_pin(access_pass.lock.lock_id, access_pass.smartlock_key_id)
     except Exception:
-        # لا نوقف العملية حتى لو فشل الـ API، لكن يفضّل تسجيل الخطأ في logging
+        # نكمل حتى لو فشل، يفضّل إضافة logging لاحقاً
         pass
 
+    # تعطيل AccessPass
     access_pass.active = False
     access_pass.save(update_fields=["active"])
 
-    # ممكن كذلك مسح الكود من الحجز لو حابة
+    # إزالة الكود من الحجز
     booking.smartlock_code = None
     booking.smartlock_key_id = None
     booking.save(update_fields=["smartlock_code", "smartlock_key_id"])

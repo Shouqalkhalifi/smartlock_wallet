@@ -1,11 +1,11 @@
 from django.db import models
 
 
-class SmartLock(models.Model):
+class Lock(models.Model):
     """
-    قفل ذكي من TTLock (أو مزود آخر)
-    lock_id = القيمة القادمة من TTLock Cloud API
-    room_id = لربطه مع غرفة في الفندق
+    القفل الذكي المرتبط بغرفة محددة.
+    lock_id = رقم القفل القادم من TTLock Cloud API
+    room_id = لربطه مع الغرفة في الحجز
     """
     provider = models.CharField(max_length=50, default="ttlock")
     room_id = models.CharField(max_length=50, unique=True)
@@ -20,10 +20,10 @@ class SmartLock(models.Model):
 
 class AccessPass(models.Model):
     """
-    كود الوصول المؤقت للقفل + بيانات بطاقة Google Wallet
+    مفتاح الوصول المؤقت للقفل + بيانات بطاقة Google Wallet
     """
     booking = models.OneToOneField("bookings.Booking", on_delete=models.CASCADE)
-    lock = models.ForeignKey(SmartLock, on_delete=models.CASCADE)
+    lock = models.ForeignKey(Lock, on_delete=models.CASCADE)
 
     smartlock_key_id = models.CharField(max_length=200, blank=True, null=True)
     smartlock_pin_code = models.CharField(max_length=50, blank=True, null=True)
