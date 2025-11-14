@@ -1,19 +1,38 @@
-<h2>إضافة حجز جديد</h2>
+{% extends "dashboard/base.html" %}
 
-<form method="POST">
+{% block content %}
+<h2 class="text-3xl font-bold mb-6">➕ إضافة حجز جديد</h2>
+
+<form method="POST" class="bg-white p-6 rounded shadow max-w-xl space-y-4">
     {% csrf_token %}
 
-    <label>اسم الضيف:</label>
-    <input type="text" name="guest_name" required>
+    <div>
+        <label class="block mb-1">اسم الضيف:</label>
+        <input type="text" name="guest_name" required
+               class="w-full border rounded px-3 py-2">
+    </div>
 
-    <label>رقم الغرفة:</label>
-    <input type="number" name="room_id" required>
+    <div>
+        <label class="block mb-1">رقم الغرفة:</label>
+        <input type="text" name="room_id" required
+               class="w-full border rounded px-3 py-2">
+    </div>
 
-    <label>من تاريخ:</label>
-    <input type="datetime-local" name="start_date" required>
+    <div>
+        <label class="block mb-1">من تاريخ:</label>
+        <input type="datetime-local" name="start_at" required
+               class="w-full border rounded px-3 py-2">
+    </div>
 
-    <label>إلى تاريخ:</label>
-    <input type="datetime-local" name="end_date" required>
+    <div>
+        <label class="block mb-1">إلى تاريخ:</label>
+        <input type="datetime-local" name="end_at" required
+               class="w-full border rounded px-3 py-2">
+    </div>
 
-    <button type="submit">حفظ</button>
+    <button type="submit"
+            class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded">
+        حفظ
+    </button>
 </form>
+{% endblock %}

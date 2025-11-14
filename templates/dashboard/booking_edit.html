@@ -1,19 +1,40 @@
-<h2>تعديل الحجز</h2>
+{% extends "dashboard/base.html" %}
 
-<form method="POST">
+{% block content %}
+<h2 class="text-3xl font-bold mb-6">تعديل الحجز رقم {{ booking.id }}</h2>
+
+<form method="POST" class="bg-white p-6 rounded shadow max-w-xl space-y-4">
     {% csrf_token %}
 
-    <label>اسم الضيف:</label>
-    <input type="text" name="guest_name" value="{{ booking.guest_name }}" required>
+    <div>
+        <label class="block mb-1">اسم الضيف:</label>
+        <input type="text" name="guest_name" value="{{ booking.guest_name }}" required
+               class="w-full border rounded px-3 py-2">
+    </div>
 
-    <label>رقم الغرفة:</label>
-    <input type="number" name="room_id" value="{{ booking.room_id }}" required>
+    <div>
+        <label class="block mb-1">رقم الغرفة:</label>
+        <input type="text" name="room_id" value="{{ booking.room_id }}" required
+               class="w-full border rounded px-3 py-2">
+    </div>
 
-    <label>من:</label>
-    <input type="datetime-local" name="start_date" value="{{ booking.start_date|date:'Y-m-d\\TH:i' }}" required>
+    <div>
+        <label class="block mb-1">من:</label>
+        <input type="datetime-local" name="start_at"
+               value="{{ booking.start_at|date:'Y-m-d\\TH:i' }}" required
+               class="w-full border rounded px-3 py-2">
+    </div>
 
-    <label>إلى:</label>
-    <input type="datetime-local" name="end_date" value="{{ booking.end_date|date:'Y-m-d\\TH:i' }}" required>
+    <div>
+        <label class="block mb-1">إلى:</label>
+        <input type="datetime-local" name="end_at"
+               value="{{ booking.end_at|date:'Y-m-d\\TH:i' }}" required
+               class="w-full border rounded px-3 py-2">
+    </div>
 
-    <button type="submit">تحديث</button>
+    <button type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded">
+        تحديث
+    </button>
 </form>
+{% endblock %}

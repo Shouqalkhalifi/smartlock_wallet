@@ -1,11 +1,9 @@
 import os
 from pathlib import Path
+
 import dj_database_url
 from dotenv import load_dotenv
 
-# -------------------------------------------------
-# Load Environment Variables
-# -------------------------------------------------
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -14,17 +12,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY
 # -------------------------------------------------
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "unsafe-default-key")
-
 DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
-CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+ALLOWED_HOSTS = [h for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h]
+CSRF_TRUSTED_ORIGINS = [
+    o for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o
+]
 
-# لوحة الإدارة السرية
 ADMIN_URL = os.getenv("DJANGO_ADMIN_URL", "secret-admin-1293/")
 
 # -------------------------------------------------
-# LANGUAGE & TIMEZONE (ARABIC SUPPORT)
+# LANGUAGE & TIMEZONE
 # -------------------------------------------------
 LANGUAGE_CODE = "ar"
 TIME_ZONE = "Asia/Riyadh"
@@ -37,9 +35,7 @@ LANGUAGES = [
     ("en", "English"),
 ]
 
-LOCALE_PATHS = [
-    BASE_DIR / "locale",
-]
+LOCALE_PATHS = [BASE_DIR / "locale"]
 
 # -------------------------------------------------
 # APPS
@@ -58,7 +54,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "corsheaders",
 
-    # Local apps
+    # Local
     "bookings",
     "locks",
     "walletpass",
@@ -71,10 +67,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-
-    # *** ضروري للتعريب ***
     "django.middleware.locale.LocaleMiddleware",
-
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -106,15 +99,25 @@ TEMPLATES = [
 WSGI_APPLICATION = "core.wsgi.application"
 
 # -------------------------------------------------
-# DATABASE (Render PostgreSQL)
+# DATABASE
 # -------------------------------------------------
-DATABASES = {
-    "default": dj_database_url.parse(
-        os.getenv("DATABASE_URL"),
-        conn_max_age=600,
-        ssl_require=True,
-    )
-}
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True,
+        )
+    }
+else:
+    # fallback بسيط للتطوير المحلي
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 # -------------------------------------------------
 # STATIC FILES
@@ -126,21 +129,23 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # CORS
 # -------------------------------------------------
 CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = os.getenv("WALLET_SAVE_ORIGINS", "").split(",")
+CORS_ALLOWED_ORIGINS = [
+    o for o in os.getenv("WALLET_SAVE_ORIGINS", "").split(",") if o
+]
 
 # -------------------------------------------------
-# REST FRAMEWORK + JWT
+# DRF + JWT
 # -------------------------------------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication"
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "SmartLock Cloud API",
-    "DESCRIPTION": "Bookings API + Igloohome + Google Wallet Integration",
+    "DESCRIPTION": "Bookings API + TTLock + Google Wallet",
     "VERSION": "1.0.0",
 }
 
@@ -157,7 +162,8 @@ GOOGLE_SERVICE_ACCOUNT_KEY_JSON_PATH = os.getenv(
 )
 
 # -------------------------------------------------
-# SMART LOCK (IGLOOHOME)
+# TTLOCK (Smart Lock)
 # -------------------------------------------------
-IGLOO_API_BASE_URL = os.getenv("SMARTLOCK_API_BASE_URL")
-IGLOO_API_KEY = os.getenv("SMARTLOCK_API_KEY")
+TTLOCK_BASE_URL = os.getenv("TTLOCK_BASE_URL", "https://api.ttlock.com")
+TTLOCK_CLIENT_ID = os.getenv("TTLOCK_CLIENT_ID")
+TTLOCK_CLIENT_SECRET = os.getenv("TTLOCK_CLIENT_SECRET")

@@ -30,3 +30,11 @@ class BookingSerializer(serializers.ModelSerializer):
             "smartlock_key_id",
             "created_at",
         ]
+        read_only_fields = (
+            "status",
+            "wallet_save_url",
+            "wallet_object_id",
+            "smartlock_code",
+            "smartlock_key_id",
+            "created_at",
+        )

@@ -1,10 +1,8 @@
 {% extends "dashboard/base.html" %}
 
 {% block content %}
-
-<!-- زر إضافة حجز جديد -->
 <div class="flex justify-start mb-6">
-    <a href="{% url 'booking_create' %}" 
+    <a href="{% url 'booking_create' %}"
        class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg transition">
         ➕ إضافة حجز جديد
     </a>
@@ -33,8 +31,8 @@
             <td class="p-3">{{ b.id }}</td>
             <td class="p-3 font-semibold">{{ b.guest_name }}</td>
             <td class="p-3">{{ b.room_id }}</td>
-            <td class="p-3">{{ b.start_date }}</td>
-            <td class="p-3">{{ b.end_date }}</td>
+            <td class="p-3">{{ b.start_at }}</td>
+            <td class="p-3">{{ b.end_at }}</td>
 
             <td class="p-3 font-bold">
                 {% if b.status == "confirmed" %}
@@ -61,5 +59,4 @@
 {% else %}
 <p class="text-gray-600 text-center text-xl mt-12">لا توجد حجوزات حالياً.</p>
 {% endif %}
-
 {% endblock %}

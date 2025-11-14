@@ -3,14 +3,14 @@ from django.db import models
 
 class SmartLock(models.Model):
     """
-    قفل ذكي من Igloohome
-    lock_id = القيمة القادمة من Igloohome Cloud API
-    room_id = لربطه مع غرفة hotel
+    قفل ذكي من TTLock (أو مزود آخر)
+    lock_id = القيمة القادمة من TTLock Cloud API
+    room_id = لربطه مع غرفة في الفندق
     """
-    provider = models.CharField(max_length=50, default="igloohome")
+    provider = models.CharField(max_length=50, default="ttlock")
     room_id = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=100)
-    lock_id = models.CharField(max_length=200, unique=True)  # مهم جدًا
+    lock_id = models.CharField(max_length=200, unique=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

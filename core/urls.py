@@ -1,37 +1,20 @@
-# core/urls.py
-
+from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
-    # -------------------------------------------------
-    # لوحة التحكم المخفية (Django Admin)
-    # -------------------------------------------------
+    # Django Admin (مخفي خلف مسار مخصص)
     path(settings.ADMIN_URL, admin.site.urls),
 
-    # -------------------------------------------------
-    # الواجهة الرئيسية → تحويل إلى لوحة الموظفين
-    # -------------------------------------------------
-    path("", include("dashboard.urls")),  # الصفحة الرئيسية للنظام
+    # الواجهة الرئيسية للموظفين
+    path("", include("dashboard.urls")),
 
-    # -------------------------------------------------
-    # لوحة الموظفين (Dashboard)
-    # -------------------------------------------------
-    path("dashboard/", include("dashboard.urls")),
-    path("dashboard/create/", booking_create, name="booking_create"),
-    path("dashboard/<int:pk>/edit/", booking_edit, name="booking_edit"),
-
-    # -------------------------------------------------
-    # API Documentation (Swagger UI)
-    # -------------------------------------------------
+    # API Docs
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="docs"),
 
-    # -------------------------------------------------
     # REST APIs
-    # -------------------------------------------------
     path("api/bookings/", include("bookings.urls")),
     path("api/locks/", include("locks.urls")),
     path("api/wallet/", include("walletpass.urls")),

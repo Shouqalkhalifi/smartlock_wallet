@@ -54,11 +54,11 @@
       </td>
       <td>
         {% if b.accesspass %}
-          {% if b.accesspass.code %}
-            <div>كود: <strong>{{ b.accesspass.code }}</strong></div>
+          {% if b.accesspass.smartlock_pin_code %}
+            <div>كود: <strong>{{ b.accesspass.smartlock_pin_code }}</strong></div>
           {% endif %}
-          {% if b.accesspass.wallet_jwt %}
-            <a href="https://pay.google.com/gp/v/save/{{ b.accesspass.wallet_jwt }}" target="_blank">حفظ البطاقة (Google Wallet)</a>
+          {% if b.accesspass.wallet_save_url %}
+            <a href="{{ b.accesspass.wallet_save_url }}" target="_blank">حفظ البطاقة (Google Wallet)</a>
           {% endif %}
         {% else %}
           —
@@ -67,13 +67,13 @@
       <td>
         <div class="actions">
           {% if b.status == 'pending' %}
-            <form method="post" action="/bookings/{{ b.id }}/confirm/">
+            <form method="post" action="/api/bookings/api/{{ b.id }}/confirm/">
               {% csrf_token %}
               <button class="btn" type="submit">تأكيد وإصدار بطاقة</button>
             </form>
           {% endif %}
           {% if b.status != 'cancelled' %}
-            <form method="post" action="/bookings/{{ b.id }}/cancel/">
+            <form method="post" action="/api/bookings/api/{{ b.id }}/cancel/">
               {% csrf_token %}
               <button class="btn cancel" type="submit">إلغاء/إبطال الوصول</button>
             </form>

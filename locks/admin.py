@@ -10,6 +10,13 @@ class SmartLockAdmin(admin.ModelAdmin):
 
 @admin.register(AccessPass)
 class AccessPassAdmin(admin.ModelAdmin):
-    list_display = ("booking", "lock", "smartlock_pin_code", "active", "valid_from", "valid_to")
+    list_display = (
+        "booking",
+        "lock",
+        "smartlock_pin_code",
+        "active",
+        "valid_from",
+        "valid_to",
+    )
     list_filter = ("active",)
     search_fields = ("smartlock_pin_code", "wallet_object_id", "booking__guest_name")

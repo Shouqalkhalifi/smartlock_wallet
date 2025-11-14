@@ -1,4 +1,6 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
+from django.utils.dateparse import parse_datetime
+
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -10,8 +12,18 @@ from locks.models import SmartLock
 from locks.services import provision_access_for_booking, revoke_access_for_booking
 
 
+def _parse_datetime_local(value: str):
+    """
+    تحويل قيمة input من نوع datetime-local إلى datetime واعي بالـ timezone (قدر الإمكان)
+    """
+    if not value:
+        return None
+    dt = parse_datetime(value)
+    return dt
+
+
 # -------------------------------------------------
-# 🟣 Dashboard (واجهة لوحة الحجوزات)
+# لوحة بسيطة لعرض الحجوزات (dashboard.html)
 # -------------------------------------------------
 def dashboard(request):
     bookings = Booking.objects.all().order_by("-created_at")
@@ -19,8 +31,11 @@ def dashboard(request):
     if request.method == "POST":
         guest_name = request.POST.get("guest_name")
         room_id = request.POST.get("room_id")
-        start_at = request.POST.get("start_at")
-        end_at = request.POST.get("end_at")
+        start_at_raw = request.POST.get("start_at")
+        end_at_raw = request.POST.get("end_at")
+
+        start_at = _parse_datetime_local(start_at_raw)
+        end_at = _parse_datetime_local(end_at_raw)
 
         Booking.objects.create(
             guest_name=guest_name,
@@ -35,7 +50,7 @@ def dashboard(request):
 
 
 # -------------------------------------------------
-# 🟣 Booking API (للـ mobile أو الأنظمة الخارجية)
+# API للحجوزات
 # -------------------------------------------------
 class BookingViewSet(viewsets.ModelViewSet):
     queryset = Booking.objects.all().order_by("-created_at")
@@ -48,12 +63,9 @@ class BookingViewSet(viewsets.ModelViewSet):
         user = self.request.user if self.request.user.is_authenticated else None
         serializer.save(user=user, status=Booking.PENDING)
 
-    # -------------------------------------------------
-    # 🟢 تأكيد الحجز (Generate PIN + Google Wallet)
-    # -------------------------------------------------
+    # تأكيد الحجز (إنشاء PIN + Wallet Pass)
     @action(detail=True, methods=["post"])
     def confirm(self, request, pk=None):
-
         booking = self.get_object()
 
         if booking.status != Booking.PENDING:
@@ -62,7 +74,6 @@ class BookingViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # 🔍 ابحث عن SmartLock مربوط بالغرفة
         try:
             lock = SmartLock.objects.get(room_id=booking.room_id)
         except SmartLock.DoesNotExist:
@@ -71,7 +82,6 @@ class BookingViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # 🔐 إنشاء الـ PIN + Wallet Pass
         try:
             access_info = provision_access_for_booking(booking, lock)
 
@@ -88,18 +98,16 @@ class BookingViewSet(viewsets.ModelViewSet):
 
         return Response(BookingSerializer(booking).data, status=status.HTTP_200_OK)
 
-    # -------------------------------------------------
-    # 🔴 إلغاء الحجز (Cancel PIN + Disable Wallet)
-    # -------------------------------------------------
+    # إلغاء الحجز (إلغاء PIN + تعطيل البطاقة)
     @action(detail=True, methods=["post"])
     def cancel(self, request, pk=None):
-
         booking = self.get_object()
 
         try:
             revoke_access_for_booking(booking)
         except Exception:
-            pass  # حتى لو API فشل، نستمر بالإلغاء
+            # حتى لو API فشل، نستمر في إلغاء الحجز داخل النظام
+            pass
 
         booking.status = Booking.CANCELLED
         booking.save()

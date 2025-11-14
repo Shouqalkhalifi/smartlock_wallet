@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام إدارة الحجوزات</title>
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
@@ -15,28 +13,22 @@
         }
     </style>
 </head>
-
 <body class="min-h-screen">
 
-    <!-- Navigation Bar -->
-    <nav class="bg-blue-800 text-white p-4 shadow">
-        <div class="container mx-auto flex justify-between items-center">
+<nav class="bg-blue-800 text-white p-4 shadow">
+    <div class="container mx-auto flex justify-between items-center">
+        <h1 class="font-bold text-xl">نظام إدارة الحجوزات</h1>
 
-            <h1 class="font-bold text-xl">نظام إدارة الحجوزات</h1>
-
-            <div class="flex gap-6">
-                <a href="{% url 'booking_list' %}" class="hover:text-yellow-300 ml-6">الحجوزات</a>
-                <a href="{% url 'dashboard_home' %}" class="hover:text-yellow-300">لوحة الموظف</a>
-            </div>
-
+        <div class="flex gap-6">
+            <a href="{% url 'booking_list' %}" class="hover:text-yellow-300 ml-6">الحجوزات</a>
+            <a href="{% url 'dashboard_home' %}" class="hover:text-yellow-300">لوحة الموظف</a>
         </div>
-    </nav>
-
-    <!-- Page Content -->
-    <div class="container mx-auto p-8">
-        {% block content %}{% endblock %}
     </div>
+</nav>
+
+<div class="container mx-auto p-8">
+    {% block content %}{% endblock %}
+</div>
 
 </body>
-
 </html>

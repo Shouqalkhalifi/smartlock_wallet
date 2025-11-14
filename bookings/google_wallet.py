@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 from typing import Tuple
 
-import jwt  # PyJWT
+import jwt
 from django.conf import settings
 from django.utils import timezone
 
@@ -24,16 +24,19 @@ def create_wallet_pass_for_booking(booking) -> Tuple[str, str]:
     with open(key_path, "r", encoding="utf-8") as f:
         service_account_info = json.load(f)
 
-    issuer_id = settings.GOOGLE_WALLET_ISSUER_ID
-    class_prefix = settings.GOOGLE_WALLET_CLASS_ID_PREFIX
+    issuer_id = settings.GOOGLE_ISSUER_ID
+    class_suffix = settings.GOOGLE_CLASS_SUFFIX
+
+    if not issuer_id or not class_suffix:
+        raise GoogleWalletError("Google Wallet issuer / class config is missing")
 
     audience = "google"
     scope = "https://www.googleapis.com/auth/wallet_object.issuer"
     iat = int(datetime.utcnow().timestamp())
-    exp = iat + 3600  # ساعة
+    exp = iat + 3600  # 1 hour
 
-    class_id = f"{issuer_id}.{class_prefix}"
-    object_id = f"{issuer_id}.{class_prefix}_{booking.id}"
+    class_id = f"{issuer_id}.{class_suffix}"
+    object_id = f"{issuer_id}.{class_suffix}_{booking.id}"
 
     payload = {
         "iss": service_account_info["client_email"],
@@ -48,7 +51,12 @@ def create_wallet_pass_for_booking(booking) -> Tuple[str, str]:
                     "id": object_id,
                     "classId": class_id,
                     "state": "active",
-                    "header": {"defaultValue": {"language": "en-US", "value": "Room Access"}},
+                    "header": {
+                        "defaultValue": {
+                            "language": "en-US",
+                            "value": "Room Access",
+                        }
+                    },
                     "subheader": {
                         "defaultValue": {
                             "language": "en-US",
@@ -86,6 +94,7 @@ def create_wallet_pass_for_booking(booking) -> Tuple[str, str]:
         payload,
         service_account_info["private_key"],
         algorithm="RS256",
+        headers={"kid": service_account_info.get("private_key_id")},
     )
 
     save_url = f"https://pay.google.com/gp/v/save/{signed_jwt}"

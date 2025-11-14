@@ -3,36 +3,44 @@
 {% block content %}
 <h2 class="text-3xl font-bold mb-6">تفاصيل الحجز رقم {{ booking.id }}</h2>
 
-<div class="bg-white shadow rounded p-6">
+<div class="bg-white shadow rounded p-6 space-y-2">
     <p><strong>اسم الضيف:</strong> {{ booking.guest_name }}</p>
     <p><strong>الغرفة:</strong> {{ booking.room_id }}</p>
-    <p><strong>من:</strong> {{ booking.start_date }}</p>
-    <p><strong>إلى:</strong> {{ booking.end_date }}</p>
+    <p><strong>من:</strong> {{ booking.start_at }}</p>
+    <p><strong>إلى:</strong> {{ booking.end_at }}</p>
     <p><strong>الحالة:</strong> {{ booking.status }}</p>
 
     <div class="mt-6 flex gap-3">
-
         {% if booking.status != "confirmed" %}
-        <a href="/dashboard/bookings/{{ booking.id }}/confirm/"
-            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
-            ✔ تأكيد الحجز
-        </a>
+        <form method="post" action="{% url 'booking_confirm' booking.id %}">
+            {% csrf_token %}
+            <button type="submit"
+                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                ✔ تأكيد الحجز
+            </button>
+        </form>
         {% endif %}
 
         {% if booking.status != "cancelled" %}
-        <a href="/dashboard/bookings/{{ booking.id }}/cancel/"
-            class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
-            ✘ إلغاء الحجز
-        </a>
+        <form method="post" action="{% url 'booking_cancel' booking.id %}">
+            {% csrf_token %}
+            <button type="submit"
+                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+                ✘ إلغاء الحجز
+            </button>
+        </form>
         {% endif %}
     </div>
 
     {% if booking.smartlock_code %}
     <div class="mt-6 bg-green-50 p-4 rounded">
         <p><strong>رمز الدخول:</strong> {{ booking.smartlock_code }}</p>
-        <p><a href="{{ booking.wallet_save_url }}" class="text-blue-600">رابط بطاقة NFC</a></p>
+        {% if booking.wallet_save_url %}
+        <p><a href="{{ booking.wallet_save_url }}" class="text-blue-600" target="_blank">
+            رابط بطاقة Google Wallet
+        </a></p>
+        {% endif %}
     </div>
     {% endif %}
 </div>
-
 {% endblock %}

@@ -1,6 +1,3 @@
-from django.apps import AppConfig
+from django.contrib import admin
 
-
-class WalletpassConfig(AppConfig):
-    default_auto_field = "django.db.models.BigAutoField"
-    name = "walletpass"
+# لا توجد موديلات حتى الآن للتسجيل في لوحة الإدارة

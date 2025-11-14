@@ -16,4 +16,9 @@ class BookingAdmin(admin.ModelAdmin):
     )
     list_filter = ("status", "room_id")
     search_fields = ("guest_name", "guest_email", "room_id")
-    readonly_fields = ("wallet_save_url", "wallet_object_id", "smartlock_code", "smartlock_key_id")
+    readonly_fields = (
+        "wallet_save_url",
+        "wallet_object_id",
+        "smartlock_code",
+        "smartlock_key_id",
+    )
