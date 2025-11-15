@@ -4,16 +4,26 @@ import time
 from django.conf import settings
 
 
-# نثبت دومين TTLock الرسمي (.com.cn) لمسارات v3 حتى لا يتأثر بخطأ في متغير البيئة
-BASE_URL = "https://api.ttlock.com.cn/v3"  # قاعدة روابط v3 (keyboardPwd, locks, ...)
-OAUTH_BASE_URL = "https://api.ttlock.com"  # OAuth2 لا يعمل تحت /v3
+# ------------------------------------------------------------
+# TTLOCK CONFIG — استخدام السيرفر العالمي (الحل النهائي لخطأ 10007)
+# ------------------------------------------------------------
+
+# السيرفر العالمي الصحيح (كل الحسابات الجديدة تكون هنا):
+BASE_URL = "https://api.ttlock.com/v3"
+OAUTH_BASE_URL = "https://api.ttlock.com"
 
 
 def get_access_token():
     """
-    سحب توكن TTLock باستخدام OAuth2
+    يسحب access_token من TTLock بطريقة OAuth2 الصحيحة.
+    سبب خطأ 10007 دائماً = بيانات دخول خاطئة أو استخدام سيرفر .cn
     """
-    raw_password = settings.TTLOCK_PASSWORD or ""
+
+    raw_password = (settings.TTLOCK_PASSWORD or "").strip()
+    if not raw_password:
+        raise Exception("TTLOCK_PASSWORD is empty — please set it in .env")
+
+    # تشفير كلمة المرور كما تطلب TTLock
     password_md5 = hashlib.md5(raw_password.encode("utf-8")).hexdigest()
 
     data = {
@@ -24,33 +34,35 @@ def get_access_token():
         "grant_type": "password",
     }
 
-    response = requests.post(f"{OAUTH_BASE_URL}/oauth2/token", data=data)
+    try:
+        response = requests.post(f"{OAUTH_BASE_URL}/oauth2/token", data=data, timeout=10)
+    except requests.exceptions.RequestException as e:
+        raise Exception(f"TTLock OAuth request failed: {e}")
 
     if response.status_code != 200:
         raise Exception(
-            "TTLock Token Error HTTP "
-            f"(status={response.status_code}, url={response.request.url}, payload={data}): "
-            f"{response.text[:500]}"
+            f"TTLock Token HTTP Error {response.status_code}: {response.text[:500]}"
         )
 
     try:
         body = response.json()
     except ValueError:
         raise Exception(
-            f"TTLock Token Error: non‑JSON response body: {response.text[:500]}"
+            f"TTLock OAuth returned non-JSON body: {response.text[:500]}"
         )
 
     access_token = body.get("access_token")
     if not access_token:
-        # نرفع الخطأ مع الجسم الكامل لمعرفة errcode/errmsg من TTLock
-        raise Exception(f"TTLock Token Error: missing access_token in response: {body}")
+        raise Exception(
+            f"TTLock Token Error: missing access_token → {body}"
+        )
 
     return access_token
 
 
 def create_pin(lock_id: str, start_ts: int, end_ts: int):
     """
-    إنشاء رقم سري (PIN) للقفل
+    توليد PIN وقتي Time Limited PIN
     """
     token = get_access_token()
 
@@ -58,32 +70,29 @@ def create_pin(lock_id: str, start_ts: int, end_ts: int):
         "clientId": settings.TTLOCK_CLIENT_ID,
         "accessToken": token,
         "lockId": lock_id,
-        "keyboardPwd": "",          # نخلي السيرفر يولّد الرمز
+        "keyboardPwd": "",
         "startDate": start_ts,
         "endDate": end_ts,
-        "addType": 2,               # ★ مهم: خلي TTLock يولّد الـ PIN
-        "keyboardPwdType": 2,       # time‑limited
+        "addType": 2,             # يولد PIN تلقائياً
+        "keyboardPwdType": 2,     # time-limited
         "date": int(time.time() * 1000),
     }
 
-    response = requests.post(f"{BASE_URL}/keyboardPwd/add", data=data)
+    try:
+        response = requests.post(f"{BASE_URL}/keyboardPwd/add", data=data, timeout=10)
+    except requests.exceptions.RequestException as e:
+        raise Exception(f"TTLock create_pin request failed: {e}")
 
-    # تأكيد أن الاستجابة ناجحة ومن نوع JSON
     if response.status_code != 200:
-        ct = response.headers.get("Content-Type", "")
         raise Exception(
-            "TTLock create_pin HTTP error "
-            f"(status={response.status_code}, content_type={ct}, "
-            f"url={response.request.url}, payload={data}): "
-            f"{response.text[:500]}"
+            f"TTLock create_pin error {response.status_code}: {response.text}"
         )
 
     try:
         return response.json()
     except ValueError:
-        # يحدث عندما لا يكون الرد JSON صالح
         raise Exception(
-            f"TTLock create_pin returned non‑JSON body: {response.text[:500]}"
+            f"TTLock create_pin returned non-JSON body: {response.text[:500]}"
         )
 
 
@@ -101,16 +110,19 @@ def delete_pin(lock_id: str, keyboard_pwd_id: str):
         "date": int(time.time() * 1000),
     }
 
-    response = requests.post(f"{BASE_URL}/keyboardPwd/delete", data=data)
+    try:
+        response = requests.post(f"{BASE_URL}/keyboardPwd/delete", data=data, timeout=10)
+    except requests.exceptions.RequestException as e:
+        raise Exception(f"TTLock delete_pin request failed: {e}")
 
     if response.status_code != 200:
         raise Exception(
-            f"TTLock delete_pin error (status {response.status_code}): {response.text}"
+            f"TTLock delete_pin error {response.status_code}: {response.text}"
         )
 
     try:
         return response.json()
     except ValueError:
         raise Exception(
-            f"TTLock delete_pin returned non‑JSON body: {response.text[:500]}"
+            f"TTLock delete_pin returned non-JSON body: {response.text[:500]}"
         )
