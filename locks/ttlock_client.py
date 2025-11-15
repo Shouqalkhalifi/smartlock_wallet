@@ -38,11 +38,11 @@ def create_pin(lock_id: str, start_ts: int, end_ts: int):
         "clientId": settings.TTLOCK_CLIENT_ID,
         "accessToken": token,
         "lockId": lock_id,
-        "keyboardPwd": "",
+        "keyboardPwd": "",          # نخلي السيرفر يولّد الرمز
         "startDate": start_ts,
         "endDate": end_ts,
-        # 2 = time‑limited password (من وقت إلى وقت)
-        "keyboardPwdType": 2,
+        "addType": 2,               # ★ مهم: خلي TTLock يولّد الـ PIN
+        "keyboardPwdType": 2,       # time‑limited
         "date": int(time.time() * 1000),
     }
 
