@@ -3,7 +3,8 @@ import time
 from django.conf import settings
 
 
-BASE_URL = settings.TTLOCK_BASE_URL  # قاعدة روابط v3 (keyboardPwd, locks, ...)
+# نثبت دومين TTLock الرسمي (.com.cn) لمسارات v3 حتى لا يتأثر بخطأ في متغير البيئة
+BASE_URL = "https://api.ttlock.com.cn/v3"  # قاعدة روابط v3 (keyboardPwd, locks, ...)
 OAUTH_BASE_URL = "https://api.ttlock.com.cn"  # OAuth2 لا يعمل تحت /v3
 
 
@@ -23,9 +24,25 @@ def get_access_token():
     response = requests.post(f"{OAUTH_BASE_URL}/oauth2/token", data=data)
 
     if response.status_code != 200:
-        raise Exception(f"TTLock Token Error: {response.text}")
+        raise Exception(
+            "TTLock Token Error HTTP "
+            f"(status={response.status_code}, url={response.request.url}, payload={data}): "
+            f"{response.text[:500]}"
+        )
 
-    return response.json().get("access_token")
+    try:
+        body = response.json()
+    except ValueError:
+        raise Exception(
+            f"TTLock Token Error: non‑JSON response body: {response.text[:500]}"
+        )
+
+    access_token = body.get("access_token")
+    if not access_token:
+        # نرفع الخطأ مع الجسم الكامل لمعرفة errcode/errmsg من TTLock
+        raise Exception(f"TTLock Token Error: missing access_token in response: {body}")
+
+    return access_token
 
 
 def create_pin(lock_id: str, start_ts: int, end_ts: int):
@@ -50,8 +67,12 @@ def create_pin(lock_id: str, start_ts: int, end_ts: int):
 
     # تأكيد أن الاستجابة ناجحة ومن نوع JSON
     if response.status_code != 200:
+        ct = response.headers.get("Content-Type", "")
         raise Exception(
-            f"TTLock create_pin error (status {response.status_code}): {response.text}"
+            "TTLock create_pin HTTP error "
+            f"(status={response.status_code}, content_type={ct}, "
+            f"url={response.request.url}, payload={data}): "
+            f"{response.text[:500]}"
         )
 
     try:

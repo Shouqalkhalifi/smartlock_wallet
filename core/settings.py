@@ -189,12 +189,10 @@ GOOGLE_SERVICE_ACCOUNT_KEY_JSON_PATH = os.getenv(
 # TTLOCK (Smart Lock)
 # -------------------------------------------------
 
-# 🔥 هذا هو القسم الذي سبب لك الأخطاء — الآن مُعدّل بالكامل
-TTLOCK_BASE_URL = os.getenv("TTLOCK_BASE_URL", "https://euapi.ttlock.com/v3")
+TTLOCK_BASE_URL = os.getenv("TTLOCK_BASE_URL", "https://api.ttlock.com.cn/v3")
 
 TTLOCK_CLIENT_ID = os.getenv("TTLOCK_CLIENT_ID")
 TTLOCK_CLIENT_SECRET = os.getenv("TTLOCK_CLIENT_SECRET")
 
-# هذه مهمة جداً — كانت ناقصة
 TTLOCK_USERNAME = os.getenv("TTLOCK_USERNAME")
 TTLOCK_PASSWORD = os.getenv("TTLOCK_PASSWORD")
