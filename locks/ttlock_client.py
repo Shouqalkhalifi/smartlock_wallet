@@ -4,7 +4,7 @@ from django.conf import settings
 
 
 BASE_URL = settings.TTLOCK_BASE_URL  # قاعدة روابط v3 (keyboardPwd, locks, ...)
-OAUTH_BASE_URL = "https://euapi.ttlock.com"  # OAuth2 لا يعمل تحت /v3
+OAUTH_BASE_URL = "https://api.ttlock.com.cn"  # OAuth2 لا يعمل تحت /v3
 
 
 def get_access_token():
