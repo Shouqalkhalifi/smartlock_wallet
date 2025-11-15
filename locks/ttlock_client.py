@@ -1,3 +1,4 @@
+import hashlib
 import requests
 import time
 from django.conf import settings
@@ -5,22 +6,24 @@ from django.conf import settings
 
 # نثبت دومين TTLock الرسمي (.com.cn) لمسارات v3 حتى لا يتأثر بخطأ في متغير البيئة
 BASE_URL = "https://api.ttlock.com.cn/v3"  # قاعدة روابط v3 (keyboardPwd, locks, ...)
-OAUTH_BASE_URL = "https://api.ttlock.com.cn"  # OAuth2 لا يعمل تحت /v3
+OAUTH_BASE_URL = "https://api.ttlock.com"  # OAuth2 لا يعمل تحت /v3
 
 
 def get_access_token():
     """
     سحب توكن TTLock باستخدام OAuth2
     """
+    raw_password = settings.TTLOCK_PASSWORD or ""
+    password_md5 = hashlib.md5(raw_password.encode("utf-8")).hexdigest()
+
     data = {
         "clientId": settings.TTLOCK_CLIENT_ID,
         "clientSecret": settings.TTLOCK_CLIENT_SECRET,
         "username": settings.TTLOCK_USERNAME,
-        "password": settings.TTLOCK_PASSWORD,
+        "password": password_md5,
         "grant_type": "password",
     }
 
-    # ملاحظة: حسب توثيق TTLock، مسار التوكن لا يحتوي /v3
     response = requests.post(f"{OAUTH_BASE_URL}/oauth2/token", data=data)
 
     if response.status_code != 200:
