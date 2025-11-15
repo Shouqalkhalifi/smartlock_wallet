@@ -1,30 +1,135 @@
 {% extends "dashboard/base.html" %}
 
 {% block content %}
-<h2 class="text-3xl font-bold mb-6">🔐 الأقفال الذكية</h2>
+<div class="space-y-7 animate-fade-in-slow">
+    <!-- Header -->
+    <div
+        class="relative overflow-hidden rounded-2xl bg-gradient-to-l from-sky-900 via-sky-800 to-cyan-700 text-white shadow-2xl px-6 py-7 sm:px-10 sm:py-9 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div class="space-y-3">
+            <p class="inline-flex items-center gap-2 text-xs sm:text-sm tracking-wide uppercase/relaxed bg-white/10 px-3 py-1 rounded-full backdrop-blur-sm border border-white/20 shadow-sm">
+                <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                إدارة الأقفال الذكية المرتبطة بالغرف
+            </p>
+            <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight flex items-center gap-3">
+                <span>الأقفال الذكية</span>
+                <span class="text-4xl sm:text-5xl">🔐</span>
+            </h2>
+            <p class="max-w-xl text-sm sm:text-base text-sky-100/90 leading-relaxed">
+                استعرض جميع الأقفال المرتبطة بالغرف، مع رقم القفل (TTLock) وتاريخ الإضافة للنظام.
+            </p>
+        </div>
 
-{% if locks %}
-<table class="min-w-full bg-white shadow rounded">
-    <thead class="bg-blue-100">
-        <tr>
-            <th class="p-3 text-right">الغرفة</th>
-            <th class="p-3 text-right">الاسم</th>
-            <th class="p-3 text-right">Lock ID</th>
-            <th class="p-3 text-right">تاريخ الإنشاء</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for lock in locks %}
-        <tr class="border-b">
-            <td class="p-3">{{ lock.room_id }}</td>
-            <td class="p-3">{{ lock.name }}</td>
-            <td class="p-3">{{ lock.lock_id }}</td>
-            <td class="p-3">{{ lock.created_at }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p class="text-gray-600 text-xl">لا توجد أقفال حالياً.</p>
-{% endif %}
+        <div class="flex flex-col items-stretch sm:items-end gap-3 text-xs sm:text-sm">
+            <div class="flex items-center gap-2 bg-black/15 px-3 py-2 rounded-xl border border-white/10">
+                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-400/90 text-slate-900 text-lg">
+                    🔑
+                </span>
+                <div class="text-sky-50/95">
+                    <p class="font-semibold">أمان عالٍ</p>
+                    <p class="text-[11px] sm:text-xs opacity-90">أقفال ذكية مخصّصة لكل غرفة</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Locks table -->
+    <div
+        class="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-2xl shadow-[0_18px_45px_rgba(15,23,42,0.08)] overflow-hidden animate-rise-soft">
+        {% if locks %}
+        <div class="px-5 sm:px-7 pt-5 sm:pt-6 pb-3 flex items-center justify-between gap-3">
+            <h3 class="text-lg sm:text-xl font-semibold text-slate-800 flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>قائمة الأقفال المسجّلة</span>
+            </h3>
+        </div>
+
+        <div class="overflow-x-auto border-t border-slate-100">
+            <table class="min-w-full text-center align-middle text-sm sm:text-base">
+                <thead class="bg-slate-50/80 text-slate-600 text-xs sm:text-sm uppercase tracking-wide">
+                    <tr>
+                        <th class="py-3.5 px-3 sm:px-4 font-semibold text-right">الغرفة</th>
+                        <th class="py-3.5 px-3 sm:px-4 font-semibold text-right">الاسم</th>
+                        <th class="py-3.5 px-3 sm:px-4 font-semibold text-right">Lock ID</th>
+                        <th class="py-3.5 px-3 sm:px-4 font-semibold text-right">تاريخ الإنشاء</th>
+                    </tr>
+                </thead>
+
+                <tbody class="text-slate-700">
+                    {% for lock in locks %}
+                    <tr
+                        class="border-t border-slate-100/90 odd:bg-white even:bg-slate-50/40 hover:bg-emerald-50/70 transition-colors duration-150">
+                        <td class="py-3.5 px-3 sm:px-4 text-right">
+                            <span
+                                class="inline-flex items-center gap-1.5 rounded-full bg-sky-50 text-sky-800 border border-sky-100 px-3 py-1 text-xs font-medium">
+                                <span class="text-base">🚪</span>
+                                <span>غرفة {{ lock.room_id }}</span>
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-3 sm:px-4 text-right text-sm">
+                            <span class="font-medium text-slate-900/90">{{ lock.name }}</span>
+                        </td>
+                        <td class="py-3.5 px-3 sm:px-4 text-right">
+                            <span
+                                class="inline-flex items-center gap-1.5 rounded-full bg-slate-900 text-slate-50 px-3 py-1 text-xs font-mono">
+                                <span class="text-base">🔑</span>
+                                <span>{{ lock.lock_id }}</span>
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-3 sm:px-4 text-right text-xs sm:text-sm text-slate-600">
+                            {{ lock.created_at }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="px-6 py-10 text-center">
+            <div class="flex flex-col items-center gap-3 text-slate-500">
+                <div
+                    class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 border border-dashed border-slate-200 text-3xl">
+                    🔐
+                </div>
+                <p class="text-base sm:text-lg font-medium">لا توجد أقفال حالياً.</p>
+                <p class="text-xs sm:text-sm max-w-xs">
+                    يمكنك إضافة أول قفل ذكي من خلال صفحة "إضافة قفل جديد" لربطه بإحدى غرف الفندق.
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    @keyframes fade-in-slow {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes rise-soft {
+        from {
+            opacity: 0;
+            transform: translateY(16px) scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .animate-fade-in-slow {
+        animation: fade-in-slow 0.5s ease-out;
+    }
+
+    .animate-rise-soft {
+        animation: rise-soft 0.6s ease-out;
+    }
+</style>
+
 {% endblock %}

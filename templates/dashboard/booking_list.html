@@ -1,66 +1,232 @@
 {% extends "dashboard/base.html" %}
 
 {% block content %}
-<div class="flex justify-start mb-6">
-<a href="{% url 'add_booking' %}" class="btn btn-success btn-lg me-2">
-    <i class="bi bi-plus"></i> إضافة حجز جديد
-</a>
+<div class="space-y-8 animate-fade-in-slow"></div>
+    <!-- Header / Hero Bar -->
+    <div
+        class="relative overflow-hidden rounded-2xl bg-gradient-to-l from-sky-900 via-sky-800 to-cyan-700 text-white shadow-2xl px-6 py-7 sm:px-10 sm:py-9 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div class="space-y-3">
+            <p class="inline-flex items-center gap-2 text-xs sm:text-sm tracking-wide uppercase/relaxed bg-white/10 px-3 py-1 rounded-full backdrop-blur-sm border border-white/20 shadow-sm">
+                <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                لوحة إدارة حجوزات الفندق
+            </p>
+            <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight flex items-center gap-3">
+                <span class="drop-shadow-sm">قائمة الحجوزات</span>
+                <span class="text-4xl sm:text-5xl drop-shadow-sm">🏨</span>
+            </h2>
+            <p class="max-w-xl text-sm sm:text-base text-sky-100/90 leading-relaxed">
+                راقب جميع حجوزات الضيوف، وتأكد من جاهزية الغرف والأقفال الذكية، مع واجهة سلسة وسريعة لموظفي الاستقبال.
+            </p>
+        </div>
 
-<a href="/locks/add/" class="btn btn-primary btn-lg">
-    <i class="bi bi-lock"></i> إضافة قفل جديد
-</a>
-
-</div>
-
-<h2 class="text-4xl font-bold text-center mb-10 text-gray-800">📘 قائمة الحجوزات</h2>
-
-{% if bookings %}
-<div class="overflow-x-auto shadow-lg rounded-lg">
-<table class="min-w-full bg-white">
-    <thead class="bg-blue-100 border-b">
-        <tr>
-            <th class="p-3 text-right">#</th>
-            <th class="p-3 text-right">الضيف</th>
-            <th class="p-3 text-right">الغرفة</th>
-            <th class="p-3 text-right">من</th>
-            <th class="p-3 text-right">إلى</th>
-            <th class="p-3 text-right">الحالة</th>
-            <th class="p-3 text-right">إدارة</th>
-        </tr>
-    </thead>
-
-    <tbody>
-    {% for b in bookings %}
-        <tr class="border-b hover:bg-gray-100 transition">
-            <td class="p-3">{{ b.id }}</td>
-            <td class="p-3 font-semibold">{{ b.guest_name }}</td>
-            <td class="p-3">{{ b.room_id }}</td>
-            <td class="p-3">{{ b.start_at }}</td>
-            <td class="p-3">{{ b.end_at }}</td>
-
-            <td class="p-3 font-bold">
-                {% if b.status == "confirmed" %}
-                    <span class="text-green-600">✔ مؤكد</span>
-                {% elif b.status == "cancelled" %}
-                    <span class="text-red-600">✘ ملغى</span>
-                {% else %}
-                    <span class="text-yellow-600">قيد الانتظار</span>
-                {% endif %}
-            </td>
-
-            <td class="p-3">
-                <a href="{% url 'booking_detail' b.id %}"
-                   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow">
-                   التفاصيل
+        <div class="flex flex-col items-stretch sm:items-end gap-3 md:gap-4">
+            <div class="flex flex-wrap gap-3 justify-start sm:justify-end">
+                <a href="{% url 'booking_create' %}"
+                   class="group inline-flex items-center gap-2 rounded-xl bg-amber-400/90 hover:bg-amber-300 text-slate-900 font-semibold px-4 sm:px-5 py-2.5 text-sm sm:text-base shadow-lg shadow-amber-900/30 transform hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200">
+                    <span
+                        class="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/90 text-white text-lg group-hover:scale-110 transform transition">
+                        ➕
+                    </span>
+                    <span>إضافة حجز جديد</span>
                 </a>
-            </td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+
+                <a href="{% url 'lock_create' %}"
+                   class="group inline-flex items-center gap-2 rounded-xl border border-cyan-200/60 bg-white/5 hover:bg-white/15 text-cyan-50 font-medium px-4 sm:px-5 py-2.5 text-sm sm:text-base shadow-md shadow-sky-950/40 transform hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200">
+                    <span
+                        class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-500/90 text-white text-lg group-hover:scale-110 transform transition">
+                        🔐
+                    </span>
+                    <span>إضافة قفل جديد</span>
+                </a>
+            </div>
+
+            <div class="flex gap-3 text-xs sm:text-sm text-sky-100/90">
+                <div class="flex items-center gap-1.5 bg-black/15 px-3 py-1.5 rounded-xl border border-white/10">
+                    <span class="h-1.5 w-4 rounded-full bg-emerald-400"></span>
+                    <span>حجوزات فعّالة</span>
+                </div>
+                <div class="flex items-center gap-1.5 bg-black/10 px-3 py-1.5 rounded-xl border border-white/5">
+                    <span class="h-1.5 w-4 rounded-full bg-yellow-300"></span>
+                    <span>تأكيد أو انتظار</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div
+        class="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-2xl shadow-[0_18px_45px_rgba(15,23,42,0.08)] overflow-hidden animate-rise-soft">
+        <div class="px-5 sm:px-7 pt-5 sm:pt-6 pb-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div>
+                <h3 class="text-lg sm:text-xl font-semibold text-slate-800 flex items-center gap-2">
+                    <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>جميع الحجوزات الحالية</span>
+                </h3>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    يمكنك استعراض حالة كل حجز بسرعة، والانتقال لتفاصيل الحجز أو القفل المرتبط به.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-2 text-[11px] sm:text-xs">
+                <span
+                    class="inline-flex items-center gap-1 rounded-full border border-emerald-100 bg-emerald-50 text-emerald-700 px-2.5 py-1">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                    مؤكد
+                </span>
+                <span
+                    class="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 text-amber-700 px-2.5 py-1">
+                    <span class="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
+                    قيد الانتظار
+                </span>
+                <span
+                    class="inline-flex items-center gap-1 rounded-full border border-rose-100 bg-rose-50 text-rose-700 px-2.5 py-1">
+                    <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>
+                    ملغي
+                </span>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto border-t border-slate-100">
+            <table class="min-w-full text-center align-middle text-sm sm:text-base">
+                <thead class="bg-slate-50/80 text-slate-600 text-xs sm:text-sm uppercase tracking-wide">
+                    <tr>
+                        <th class="py-3.5 px-3 sm:px-4 font-semibold">#</th>
+                        <th class="py-3.5 px-3 sm:px-4 font-semibold">الضيف</th>
+                        <th class="py-3.5 px-3 sm:px-4 font-semibold">الغرفة</th>
+                        <th class="py-3.5 px-3 sm:px-4 font-semibold">من</th>
+                        <th class="py-3.5 px-3 sm:px-4 font-semibold">إلى</th>
+                        <th class="py-3.5 px-3 sm:px-4 font-semibold">الحالة</th>
+                        <th class="py-3.5 px-3 sm:px-4 font-semibold">إدارة</th>
+                    </tr>
+                </thead>
+
+                <tbody class="text-slate-700">
+                    {% for booking in bookings %}
+                    <tr
+                        class="border-t border-slate-100/90 odd:bg-white even:bg-slate-50/40 hover:bg-sky-50/80 transition-colors duration-150 group">
+                        <td class="py-3.5 px-3 sm:px-4 font-semibold text-slate-900/80 text-xs sm:text-sm">
+                            {{ forloop.counter }}
+                        </td>
+                        <td class="py-3.5 px-3 sm:px-4 text-sm">
+                            <div class="flex flex-col items-center gap-0.5">
+                                <span class="font-medium text-slate-900/90 group-hover:text-sky-900 transition-colors">
+                                    {{ booking.guest_name }}
+                                </span>
+                                <span class="text-[11px] text-slate-500">ضيف الفندق</span>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-3 sm:px-4 text-sm">
+                            <span
+                                class="inline-flex items-center gap-1.5 rounded-full bg-sky-50 text-sky-800 border border-sky-100 px-3 py-1 text-xs font-medium">
+                                <span class="text-base">🚪</span>
+                                <span>غرفة {{ booking.room_id }}</span>
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-3 sm:px-4 text-xs sm:text-sm text-slate-600">
+                            {{ booking.start_at }}
+                        </td>
+                        <td class="py-3.5 px-3 sm:px-4 text-xs sm:text-sm text-slate-600">
+                            {{ booking.end_at }}
+                        </td>
+
+                        <td class="py-3.5 px-3 sm:px-4">
+                            {% if booking.status == 'pending' %}
+                                <span
+                                    class="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-700 border border-amber-100 px-3 py-1 text-xs font-semibold animate-soft-pop">
+                                    <span class="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></span>
+                                    قيد الانتظار
+                                </span>
+                            {% elif booking.status == 'confirmed' %}
+                                <span
+                                    class="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 px-3 py-1 text-xs font-semibold animate-soft-pop">
+                                    <span class="text-base">✔</span>
+                                    مؤكد
+                                </span>
+                            {% else %}
+                                <span
+                                    class="inline-flex items-center gap-1 rounded-full bg-rose-50 text-rose-700 border border-rose-100 px-3 py-1 text-xs font-semibold animate-soft-pop">
+                                    <span class="text-base">✖</span>
+                                    ملغي
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="py-3.5 px-3 sm:px-4">
+                            <a href="{% url 'booking_detail' booking.id %}"
+                               class="inline-flex items-center gap-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs sm:text-sm font-medium px-3.5 sm:px-4 py-2 shadow-md shadow-sky-900/30 transform hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200">
+                                <span class="text-base">📄</span>
+                                <span>التفاصيل</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="py-10 px-4 text-center">
+                            <div class="flex flex-col items-center gap-3 text-slate-500">
+                                <div
+                                    class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 border border-dashed border-slate-200 text-3xl">
+                                    🗂️
+                                </div>
+                                <p class="text-base sm:text-lg font-medium">لا توجد حجوزات حالياً.</p>
+                                <p class="text-xs sm:text-sm max-w-xs">
+                                    يمكنك البدء بإضافة أول حجز للضيوف من خلال زر "إضافة حجز جديد" في أعلى الصفحة.
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
-{% else %}
-<p class="text-gray-600 text-center text-xl mt-12">لا توجد حجوزات حالياً.</p>
-{% endif %}
+<style>
+    @keyframes fade-in-slow {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes rise-soft {
+        from {
+            opacity: 0;
+            transform: translateY(16px) scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @keyframes soft-pop {
+        0% {
+            transform: scale(0.95);
+        }
+        60% {
+            transform: scale(1.03);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .animate-fade-in-slow {
+        animation: fade-in-slow 0.5s ease-out;
+    }
+
+    .animate-rise-soft {
+        animation: rise-soft 0.6s ease-out;
+    }
+
+    .animate-soft-pop {
+        animation: soft-pop 0.28s ease-out;
+    }
+</style>
+
 {% endblock %}

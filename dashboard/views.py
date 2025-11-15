@@ -13,18 +13,15 @@ def _parse_datetime_local(value: str):
     return parse_datetime(value)
 
 
-# الصفحة الرئيسية للوحة التحكم
 def dashboard_home(request):
     return render(request, "dashboard/home.html")
 
 
-# قائمة الحجوزات
 def booking_list(request):
     bookings = Booking.objects.order_by("-created_at")
     return render(request, "dashboard/booking_list.html", {"bookings": bookings})
 
 
-# إنشاء حجز جديد
 def booking_create(request):
     if request.method == "POST":
         guest_name = request.POST.get("guest_name")
@@ -49,7 +46,6 @@ def booking_create(request):
     return render(request, "dashboard/booking_create.html")
 
 
-# تعديل الحجز
 def booking_edit(request, pk):
     booking = get_object_or_404(Booking, pk=pk)
 
@@ -69,13 +65,11 @@ def booking_edit(request, pk):
     return render(request, "dashboard/booking_edit.html", {"booking": booking})
 
 
-# تفاصيل الحجز
 def booking_detail(request, pk):
     booking = get_object_or_404(Booking, pk=pk)
     return render(request, "dashboard/booking_detail.html", {"booking": booking})
 
 
-# تأكيد الحجز (إنشاء رمز الدخول + ربط القفل)
 def booking_confirm(request, pk):
     booking = get_object_or_404(Booking, pk=pk)
 
@@ -86,14 +80,12 @@ def booking_confirm(request, pk):
         messages.info(request, "الحجز مؤكد مسبقاً.")
         return redirect("booking_detail", pk=pk)
 
-    # التحقق من وجود قفل لنفس رقم الغرفة
     try:
         lock = Lock.objects.get(room_id=booking.room_id)
     except Lock.DoesNotExist:
         messages.error(request, "لا يوجد قفل مربوط بهذه الغرفة.")
         return redirect("booking_detail", pk=pk)
 
-    # إنشاء رمز الدخول وتهيئة صلاحية الوصول
     try:
         access_info = provision_access_for_booking(booking, lock)
         booking.status = Booking.CONFIRMED
@@ -109,7 +101,6 @@ def booking_confirm(request, pk):
     return redirect("booking_detail", pk=pk)
 
 
-# إلغاء الحجز
 def booking_cancel(request, pk):
     booking = get_object_or_404(Booking, pk=pk)
 
@@ -128,13 +119,49 @@ def booking_cancel(request, pk):
     return redirect("booking_detail", pk=pk)
 
 
-# قائمة الأقفال
 def locks_list(request):
     locks = Lock.objects.order_by("room_id")
     return render(request, "dashboard/locks_list.html", {"locks": locks})
 
 
-# صفحة بطاقات Google Wallet
+# ⭐ إضافة قفل جديد
+def lock_create(request):
+    if request.method == "POST":
+        guest_name = request.POST.get("guest_name")
+        room_id = request.POST.get("room_id")
+        lock_id = request.POST.get("lock_id")
+
+        # اسم القفل يُضبط تلقائياً (يمكن لاحقاً جعله حقل مستقل في الواجهة)
+        lock_name = guest_name or f"غرفة {room_id}"
+
+        Lock.objects.create(
+            room_id=room_id,
+            lock_id=lock_id,
+            name=lock_name,
+        )
+
+        messages.success(request, "تم إضافة القفل بنجاح ✔️")
+        return redirect("locks_list")
+
+    # تعبئة قوائم الضيوف والغرف من الحجوزات السابقة
+    guests = (
+        Booking.objects.exclude(guest_name="")
+        .values_list("guest_name", flat=True)
+        .distinct()
+    )
+    rooms = (
+        Booking.objects.exclude(room_id="")
+        .values_list("room_id", flat=True)
+        .distinct()
+    )
+
+    return render(
+        request,
+        "dashboard/lock_create.html",
+        {"guests": guests, "rooms": rooms},
+    )
+
+
 def wallet_home(request):
     passes = AccessPass.objects.order_by("-created_at")
     return render(request, "dashboard/wallet_list.html", {"passes": passes})

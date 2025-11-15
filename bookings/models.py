@@ -33,12 +33,8 @@ class Booking(models.Model):
     wallet_object_id = models.CharField(max_length=200, blank=True, null=True)
     wallet_save_url = models.URLField(blank=True, null=True)
 
-    smartlock_code = models.CharField(
-        max_length=100, blank=True, null=True
-    )
-    smartlock_key_id = models.CharField(
-        max_length=100, blank=True, null=True
-    )
+    smartlock_code = models.CharField(max_length=100, blank=True, null=True)
+    smartlock_key_id = models.CharField(max_length=100, blank=True, null=True)
 
     def is_active(self) -> bool:
         now = timezone.now()

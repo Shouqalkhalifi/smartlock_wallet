@@ -14,10 +14,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "unsafe-default-key")
 
-# DEBUG ديناميكي
 DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
 
-# Render / Production hosts
 DEFAULT_ALLOWED = [
     "localhost",
     "127.0.0.1",
@@ -28,24 +26,20 @@ DEFAULT_ALLOWED = [
 ENV_ALLOWED = [h for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h]
 ALLOWED_HOSTS = list(set(DEFAULT_ALLOWED + ENV_ALLOWED))
 
-# CSRF
-DEFAULT_CSRF = [
-    "https://*.onrender.com",
-]
+DEFAULT_CSRF = ["https://*.onrender.com"]
 ENV_CSRF = [o for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o]
 CSRF_TRUSTED_ORIGINS = list(set(DEFAULT_CSRF + ENV_CSRF))
 
-# HTTPS Security
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
-# 🔥 هنا التعديل: رابط لوحة التحكم
 ADMIN_URL = "admin/"
 
 # -------------------------------------------------
 # LANGUAGE & TIMEZONE
 # -------------------------------------------------
+
 LANGUAGE_CODE = "ar"
 TIME_ZONE = "Asia/Riyadh"
 
@@ -59,10 +53,10 @@ LANGUAGES = [
 
 LOCALE_PATHS = [BASE_DIR / "locale"]
 
-
 # -------------------------------------------------
 # APPS
 # -------------------------------------------------
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -84,6 +78,7 @@ INSTALLED_APPS = [
 # -------------------------------------------------
 # MIDDLEWARE
 # -------------------------------------------------
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -100,6 +95,7 @@ ROOT_URLCONF = "core.urls"
 # -------------------------------------------------
 # TEMPLATES
 # -------------------------------------------------
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -121,6 +117,7 @@ WSGI_APPLICATION = "core.wsgi.application"
 # -------------------------------------------------
 # DATABASE
 # -------------------------------------------------
+
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if DATABASE_URL:
@@ -142,6 +139,7 @@ else:
 # -------------------------------------------------
 # STATIC FILES
 # -------------------------------------------------
+
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
@@ -151,6 +149,7 @@ STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 # -------------------------------------------------
 # CORS
 # -------------------------------------------------
+
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     o for o in os.getenv("WALLET_SAVE_ORIGINS", "").split(",") if o
@@ -159,6 +158,7 @@ CORS_ALLOWED_ORIGINS = [
 # -------------------------------------------------
 # DRF + JWT
 # -------------------------------------------------
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -177,6 +177,7 @@ ACCESS_TOKEN_LIFETIME_MIN = int(os.getenv("ACCESS_TOKEN_LIFETIME_MIN", 60))
 # -------------------------------------------------
 # GOOGLE WALLET
 # -------------------------------------------------
+
 GOOGLE_ISSUER_ID = os.getenv("GOOGLE_ISSUER_ID")
 GOOGLE_CLASS_SUFFIX = os.getenv("GOOGLE_CLASS_SUFFIX")
 GOOGLE_SERVICE_ACCOUNT_EMAIL = os.getenv("GOOGLE_SERVICE_ACCOUNT_EMAIL")
@@ -187,6 +188,13 @@ GOOGLE_SERVICE_ACCOUNT_KEY_JSON_PATH = os.getenv(
 # -------------------------------------------------
 # TTLOCK (Smart Lock)
 # -------------------------------------------------
-TTLOCK_BASE_URL = os.getenv("TTLOCK_BASE_URL", "https://api.ttlock.com")
+
+# 🔥 هذا هو القسم الذي سبب لك الأخطاء — الآن مُعدّل بالكامل
+TTLOCK_BASE_URL = os.getenv("TTLOCK_BASE_URL", "https://euapi.ttlock.com/v3")
+
 TTLOCK_CLIENT_ID = os.getenv("TTLOCK_CLIENT_ID")
 TTLOCK_CLIENT_SECRET = os.getenv("TTLOCK_CLIENT_SECRET")
+
+# هذه مهمة جداً — كانت ناقصة
+TTLOCK_USERNAME = os.getenv("TTLOCK_USERNAME")
+TTLOCK_PASSWORD = os.getenv("TTLOCK_PASSWORD")

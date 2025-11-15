@@ -1,40 +1,112 @@
 {% extends "dashboard/base.html" %}
 
 {% block content %}
-<h2 class="text-3xl font-bold mb-6">تعديل الحجز رقم {{ booking.id }}</h2>
-
-<form method="POST" class="bg-white p-6 rounded shadow max-w-xl space-y-4">
-    {% csrf_token %}
-
-    <div>
-        <label class="block mb-1">اسم الضيف:</label>
-        <input type="text" name="guest_name" value="{{ booking.guest_name }}" required
-               class="w-full border rounded px-3 py-2">
+<div class="space-y-7 animate-fade-in-slow">
+    <!-- Header -->
+    <div
+        class="relative overflow-hidden rounded-2xl bg-gradient-to-l from-sky-900 via-sky-800 to-cyan-700 text-white shadow-2xl px-6 py-6 sm:px-9 sm:py-7 flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+        <div class="space-y-3">
+            <p class="inline-flex items-center gap-2 text-xs sm:text-sm tracking-wide uppercase/relaxed bg-white/10 px-3 py-1 rounded-full backdrop-blur-sm border border-white/20 shadow-sm">
+                <span class="h-2 w-2 rounded-full bg-amber-300 animate-pulse"></span>
+                تعديل بيانات حجز ضيف الفندق
+            </p>
+            <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-3">
+                <span>تعديل الحجز رقم {{ booking.id }}</span>
+                <span class="text-3xl sm:text-4xl">✏️</span>
+            </h2>
+            <p class="max-w-xl text-xs sm:text-sm text-sky-100/90 leading-relaxed">
+                قم بتحديث بيانات الضيف، الغرفة، أو تواريخ الإقامة، مع الحفاظ على الحجز الحالي في النظام.
+            </p>
+        </div>
     </div>
 
-    <div>
-        <label class="block mb-1">رقم الغرفة:</label>
-        <input type="text" name="room_id" value="{{ booking.room_id }}" required
-               class="w-full border rounded px-3 py-2">
-    </div>
+    <!-- Form Card -->
+    <div
+        class="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-2xl shadow-[0_18px_45px_rgba(15,23,42,0.08)] max-w-xl animate-rise-soft">
+        <form method="POST" class="px-5 sm:px-7 py-6 sm:py-7 space-y-5">
+            {% csrf_token %}
 
-    <div>
-        <label class="block mb-1">من:</label>
-        <input type="datetime-local" name="start_at"
-               value="{{ booking.start_at|date:'Y-m-d\\TH:i' }}" required
-               class="w-full border rounded px-3 py-2">
-    </div>
+            <div class="space-y-2">
+                <label class="block text-sm font-semibold text-slate-800">اسم الضيف</label>
+                <div class="relative">
+                    <input type="text" name="guest_name" value="{{ booking.guest_name }}" required
+                           class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none">
+                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400 text-sm">👤</span>
+                </div>
+            </div>
 
-    <div>
-        <label class="block mb-1">إلى:</label>
-        <input type="datetime-local" name="end_at"
-               value="{{ booking.end_at|date:'Y-m-d\\TH:i' }}" required
-               class="w-full border rounded px-3 py-2">
-    </div>
+            <div class="space-y-2">
+                <label class="block text-sm font-semibold text-slate-800">رقم الغرفة</label>
+                <div class="relative">
+                    <input type="text" name="room_id" value="{{ booking.room_id }}" required
+                           class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none">
+                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400 text-sm">🚪</span>
+                </div>
+            </div>
 
-    <button type="submit"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded">
-        تحديث
-    </button>
-</form>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-slate-800">من تاريخ</label>
+                    <div class="relative">
+                        <input type="datetime-local" name="start_at"
+                               value="{{ booking.start_at|date:'Y-m-d\\TH:i' }}" required
+                               class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none">
+                        <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400 text-sm">📅</span>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-slate-800">إلى تاريخ</label>
+                    <div class="relative">
+                        <input type="datetime-local" name="end_at"
+                               value="{{ booking.end_at|date:'Y-m-d\\TH:i' }}" required
+                               class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none">
+                        <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400 text-sm">📆</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <button type="submit"
+                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white px-6 py-2.5 text-sm font-semibold shadow-md shadow-sky-900/30 transform hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200">
+                    <span class="text-lg">💾</span>
+                    <span>تحديث الحجز</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    @keyframes fade-in-slow {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes rise-soft {
+        from {
+            opacity: 0;
+            transform: translateY(16px) scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .animate-fade-in-slow {
+        animation: fade-in-slow 0.5s ease-out;
+    }
+
+    .animate-rise-soft {
+        animation: rise-soft 0.6s ease-out;
+    }
+</style>
+
 {% endblock %}

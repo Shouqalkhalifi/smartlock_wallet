@@ -3,32 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام إدارة الحجوزات</title>
+    <title>نظام إدارة الحجوزات - لوحة الفندق</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
         body {
-            background-color: #f5f7fa;
+            /* خلفية رمادية فاتحة ناعمة لإبراز الكروت البيضاء */
+            background-color: #f3f4f6;
+        }
+
+        .glass-nav {
+            background: linear-gradient(to left, rgba(15,23,42,0.95), rgba(30,64,175,0.96));
+            backdrop-filter: blur(18px);
         }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen bg-slate-50 text-slate-900">
 
-<nav class="bg-blue-800 text-white p-4 shadow">
-    <div class="container mx-auto flex justify-between items-center">
-        <h1 class="font-bold text-xl">نظام إدارة الحجوزات</h1>
+<nav class="glass-nav text-white shadow-lg shadow-slate-900/40 border-b border-white/10">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex h-14 sm:h-16 items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div
+                    class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-400/95 text-slate-900 text-xl shadow-md shadow-amber-900/40">
+                    🏨
+                </div>
+                <div class="leading-tight hidden sm:block">
+                    <p class="text-sm font-semibold">نظام إدارة الحجوزات</p>
+                    <p class="text-[11px] text-sky-100/80">لوحة تحكم الفندق</p>
+                </div>
+            </div>
 
-        <div class="flex gap-6">
-            <a href="{% url 'booking_list' %}" class="hover:text-yellow-300 ml-6">الحجوزات</a>
-            <a href="{% url 'dashboard_home' %}" class="hover:text-yellow-300">لوحة الموظف</a>
+            <div class="flex items-center gap-4 text-xs sm:text-sm">
+                <a href="{% url 'dashboard_home' %}"
+                   class="px-3 py-1.5 rounded-full hover:bg-white/10 transition-colors">
+                    لوحة الموظف
+                </a>
+                <a href="{% url 'booking_list' %}"
+                   class="px-3 py-1.5 rounded-full hover:bg-white/10 transition-colors">
+                    الحجوزات
+                </a>
+            </div>
         </div>
     </div>
 </nav>
 
-<div class="container mx-auto p-8">
-    {% block content %}{% endblock %}
-</div>
+<main class="min-h-[calc(100vh-3.5rem)] bg-slate-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
+        {% block content %}{% endblock %}
+    </div>
+</main>
 
 </body>
 </html>

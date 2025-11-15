@@ -1,22 +1,101 @@
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-    <meta charset="UTF-8">
-    <title>Dashboard</title>
-</head>
-<body>
-    <h1>الحجوزات</h1>
+{% extends "dashboard/base.html" %}
 
-    {% if bookings %}
-        <ul>
-            {% for booking in bookings %}
-                <li>
-                    {{ booking.id }} - {{ booking.status }} - {{ booking.room_id }}
+{% block content %}
+<div class="space-y-7 animate-fade-in-slow">
+    <!-- Header -->
+    <div
+        class="relative overflow-hidden rounded-2xl bg-gradient-to-l from-sky-900 via-sky-800 to-cyan-700 text-white shadow-2xl px-6 py-7 sm:px-10 sm:py-9 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div class="space-y-3">
+            <p class="inline-flex items-center gap-2 text-xs sm:text-sm tracking-wide uppercase/relaxed bg-white/10 px-3 py-1 rounded-full backdrop-blur-sm border border-white/20 shadow-sm">
+                <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                ملخص سريع لأحدث الحجوزات
+            </p>
+            <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight flex items-center gap-3">
+                <span>أحدث الحجوزات</span>
+                <span class="text-4xl sm:text-5xl">🗓️</span>
+            </h1>
+            <p class="max-w-xl text-sm sm:text-base text-sky-100/90 leading-relaxed">
+                يعرض هذا القسم قائمة مبسّطة بالحجوزات الحالية، مع حالة كل حجز ورقم الغرفة المرتبطة به.
+            </p>
+        </div>
+    </div>
+
+    <!-- Bookings summary card -->
+    <div
+        class="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-2xl shadow-[0_18px_45px_rgba(15,23,42,0.08)] overflow-hidden animate-rise-soft">
+        {% if bookings %}
+        <div class="px-5 sm:px-7 pt-5 sm:pt-6 pb-3 flex items-center justify-between gap-3">
+            <h2 class="text-lg sm:text-xl font-semibold text-slate-800 flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>قائمة الحجوزات</span>
+            </h2>
+        </div>
+
+        <div class="border-t border-slate-100">
+            <ul class="divide-y divide-slate-100">
+                {% for booking in bookings %}
+                <li class="px-5 sm:px-7 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div class="flex items-center gap-3">
+                        <span
+                            class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-sky-50 text-sky-700 text-sm font-semibold">
+                            #{{ booking.id }}
+                        </span>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-medium text-slate-900">غرفة {{ booking.room_id }}</span>
+                            <span class="text-xs text-slate-500">حالة: {{ booking.status }}</span>
+                        </div>
+                    </div>
                 </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>لا يوجد حجوزات.....</p>
-    {% endif %}
-</body>
-</html>
+                {% endfor %}
+            </ul>
+        </div>
+        {% else %}
+        <div class="px-6 py-10 text-center">
+            <div class="flex flex-col items-center gap-3 text-slate-500">
+                <div
+                    class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 border border-dashed border-slate-200 text-3xl">
+                    📭
+                </div>
+                <p class="text-base sm:text-lg font-medium">لا يوجد حجوزات حالياً.</p>
+                <p class="text-xs sm:text-sm max-w-xs">
+                    يمكنك البدء بإنشاء أول حجز من خلال صفحة "إضافة حجز جديد" في لوحة الإدارة.
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    @keyframes fade-in-slow {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes rise-soft {
+        from {
+            opacity: 0;
+            transform: translateY(16px) scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .animate-fade-in-slow {
+        animation: fade-in-slow 0.5s ease-out;
+    }
+
+    .animate-rise-soft {
+        animation: rise-soft 0.6s ease-out;
+    }
+</style>
+
+{% endblock %}

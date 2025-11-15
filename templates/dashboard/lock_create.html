@@ -8,14 +8,14 @@
         <div class="space-y-3">
             <p class="inline-flex items-center gap-2 text-xs sm:text-sm tracking-wide uppercase/relaxed bg-white/10 px-3 py-1 rounded-full backdrop-blur-sm border border-white/20 shadow-sm">
                 <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                إنشاء حجز جديد لضيف الفندق
+                إضافة قفل ذكي جديد لغرف الفندق
             </p>
             <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-3">
-                <span>➕ إضافة حجز جديد</span>
-                <span class="text-3xl sm:text-4xl">🏨</span>
+                <span>➕ إضافة قفل جديد</span>
+                <span class="text-3xl sm:text-4xl">🔐</span>
             </h2>
             <p class="max-w-xl text-xs sm:text-sm text-sky-100/90 leading-relaxed">
-                اختر الضيف والغرفة، وحدد تواريخ الإقامة ليتم إنشاء الحجز وإصدار رمز الدخول الذكي للقفل.
+                قم بربط قفل TTLock بالغرفة المناسبة، ليتمكن النظام من إنشاء أكواد دخول للنزلاء بشكل آمن وسلس.
             </p>
         </div>
     </div>
@@ -23,46 +23,43 @@
     <!-- Form Card -->
     <div
         class="bg-white/80 backdrop-blur-sm border border-slate-200 rounded-2xl shadow-[0_18px_45px_rgba(15,23,42,0.08)] max-w-xl mx-auto animate-rise-soft">
-        <form method="POST" class="px-5 sm:px-7 py-6 sm:py-7 space-y-5">
+        <form method="post" class="px-5 sm:px-7 py-6 sm:py-7 space-y-5">
             {% csrf_token %}
 
             <div class="space-y-2">
-                <label class="block text-sm font-semibold text-slate-800">اسم الضيف</label>
+                <label class="block text-sm font-semibold text-slate-800">اختر الضيف</label>
                 <div class="relative">
-                    <input type="text" name="guest_name" required
-                           placeholder="اكتب اسم الضيف"
-                           class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none">
+                    <select name="guest_name" required
+                            class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none appearance-none">
+                        <option value="">اختر الضيف</option>
+                        {% for g in guests %}
+                            <option value="{{ g }}">{{ g }}</option>
+                        {% endfor %}
+                    </select>
                     <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400 text-sm">👤</span>
                 </div>
             </div>
 
             <div class="space-y-2">
-                <label class="block text-sm font-semibold text-slate-800">رقم الغرفة</label>
+                <label class="block text-sm font-semibold text-slate-800">اختر الغرفة</label>
                 <div class="relative">
-                    <input type="text" name="room_id" required
-                           placeholder="اكتب رقم الغرفة (مثال: 300)"
-                           class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none">
+                    <select name="room_id" required
+                            class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none appearance-none">
+                        <option value="">اختر الغرفة</option>
+                        {% for r in rooms %}
+                            <option value="{{ r }}">{{ r }}</option>
+                        {% endfor %}
+                    </select>
                     <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400 text-sm">🚪</span>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="space-y-2">
-                    <label class="block text-sm font-semibold text-slate-800">من تاريخ</label>
-                    <div class="relative">
-                        <input type="datetime-local" name="start_at" required
-                               class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none">
-                        <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400 text-sm">📅</span>
-                    </div>
-                </div>
-
-                <div class="space-y-2">
-                    <label class="block text-sm font-semibold text-slate-800">إلى تاريخ</label>
-                    <div class="relative">
-                        <input type="datetime-local" name="end_at" required
-                               class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none">
-                        <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400 text-sm">📆</span>
-                    </div>
+            <div class="space-y-2">
+                <label class="block text-sm font-semibold text-slate-800">رقم القفل (TTLock)</label>
+                <div class="relative">
+                    <input type="text" name="lock_id" required
+                           class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none">
+                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400 text-sm">🔑</span>
                 </div>
             </div>
 
@@ -70,7 +67,7 @@
                 <button type="submit"
                         class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-sm font-semibold shadow-md shadow-emerald-900/30 transform hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200">
                     <span class="text-lg">💾</span>
-                    <span>حفظ الحجز</span>
+                    <span>حفظ القفل</span>
                 </button>
             </div>
         </form>
