@@ -1,34 +1,27 @@
 import os
 from pathlib import Path
 
-import dj_database_url
-from dotenv import load_dotenv
-
-load_dotenv()
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # -------------------------------------------------
 # SECURITY
 # -------------------------------------------------
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "unsafe-default-key")
+SECRET_KEY = "unsafe-default-key"       # ضعي مفتاحك لاحقاً لو احتجتِي
 
-DEBUG = os.getenv("DJANGO_DEBUG", "False").lower() == "true"
+DEBUG = True
 
-DEFAULT_ALLOWED = [
+ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     ".onrender.com",
-    os.getenv("RENDER_EXTERNAL_HOSTNAME", "")
+    "smartlock-wallet.onrender.com",
 ]
 
-ENV_ALLOWED = [h for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h]
-ALLOWED_HOSTS = list(set(DEFAULT_ALLOWED + ENV_ALLOWED))
-
-DEFAULT_CSRF = ["https://*.onrender.com"]
-ENV_CSRF = [o for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o]
-CSRF_TRUSTED_ORIGINS = list(set(DEFAULT_CSRF + ENV_CSRF))
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.onrender.com",
+    "https://smartlock-wallet.onrender.com"
+]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = True
@@ -115,26 +108,15 @@ TEMPLATES = [
 WSGI_APPLICATION = "core.wsgi.application"
 
 # -------------------------------------------------
-# DATABASE
+# DATABASE (SQLite)
 # -------------------------------------------------
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-if DATABASE_URL:
-    DATABASES = {
-        "default": dj_database_url.parse(
-            DATABASE_URL,
-            conn_max_age=600,
-            ssl_require=True,
-        )
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
+}
 
 # -------------------------------------------------
 # STATIC FILES
@@ -145,15 +127,6 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
-
-# -------------------------------------------------
-# CORS
-# -------------------------------------------------
-
-CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = [
-    o for o in os.getenv("WALLET_SAVE_ORIGINS", "").split(",") if o
-]
 
 # -------------------------------------------------
 # DRF + JWT
@@ -172,27 +145,26 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
 }
 
-ACCESS_TOKEN_LIFETIME_MIN = int(os.getenv("ACCESS_TOKEN_LIFETIME_MIN", 60))
+ACCESS_TOKEN_LIFETIME_MIN = 60
 
 # -------------------------------------------------
 # GOOGLE WALLET
 # -------------------------------------------------
 
-GOOGLE_ISSUER_ID = os.getenv("GOOGLE_ISSUER_ID")
-GOOGLE_CLASS_SUFFIX = os.getenv("GOOGLE_CLASS_SUFFIX")
-GOOGLE_SERVICE_ACCOUNT_EMAIL = os.getenv("GOOGLE_SERVICE_ACCOUNT_EMAIL")
-GOOGLE_SERVICE_ACCOUNT_KEY_JSON_PATH = os.getenv(
-    "GOOGLE_SERVICE_ACCOUNT_KEY_JSON_PATH"
-)
+GOOGLE_ISSUER_ID = "106815132786242054438"
+GOOGLE_CLASS_SUFFIX = "roomaccess"
+GOOGLE_SERVICE_ACCOUNT_EMAIL = "wallet-service@dream-c3154.iam.gserviceaccount.com"
+GOOGLE_SERVICE_ACCOUNT_KEY_JSON_PATH = str(BASE_DIR / "google_wallet_key.json")
 
 # -------------------------------------------------
 # TTLOCK (Smart Lock)
 # -------------------------------------------------
 
-TTLOCK_BASE_URL = os.getenv("TTLOCK_BASE_URL", "https://api.ttlock.com.cn/v3")
+TTLOCK_BASE_URL = "https://api.ttlock.com.cn/v3"
 
-TTLOCK_CLIENT_ID = os.getenv("TTLOCK_CLIENT_ID")
-TTLOCK_CLIENT_SECRET = os.getenv("TTLOCK_CLIENT_SECRET")
+TTLOCK_CLIENT_ID = "068ed449f3074fa5a8effd5c9fc49ed1"
+TTLOCK_CLIENT_SECRET = "cf6f87bbef0308efa9e2b788334ad57b"
 
-TTLOCK_USERNAME = os.getenv("TTLOCK_USERNAME")
-TTLOCK_PASSWORD = os.getenv("TTLOCK_PASSWORD")
+TTLOCK_USERNAME = "kh080dddd@gmail.com"
+TTLOCK_PASSWORD = "shoog1999"
+

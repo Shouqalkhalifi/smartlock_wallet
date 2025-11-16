@@ -1,11 +1,10 @@
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Tuple
 
 import jwt
 from django.conf import settings
-from django.utils import timezone
 
 
 class GoogleWalletError(Exception):
